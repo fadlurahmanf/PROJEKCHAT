@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:context=".ui.regis.RegisterActivity">
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:id="@+id/registerActivity_inputProfileImage"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/registerActivity_layoutInput"
+        android:src="@drawable/ic_person_black"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:id="@+id/registerActivity_layoutInput"
+        app:layout_constraintBottom_toTopOf="@id/registerActivity_btnRegis"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginHorizontal="40dp"
+        android:layout_marginVertical="30dp">
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:startIconDrawable="@drawable/ic_person_black"
+            app:boxStrokeColor="@color/color_primary_darker"
+            app:hintTextColor="@color/color_primary_darker"
+            android:layout_marginVertical="10dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/registerActivity_inputFullName"
+                android:inputType="text"
+                android:maxLength="30"
+                android:maxLines="1"
+                android:hint="FULL NAME"/>
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:startIconDrawable="@drawable/ic_email_black"
+            app:boxStrokeColor="@color/color_primary_darker"
+            app:hintTextColor="@color/color_primary_darker"
+            android:layout_marginVertical="10dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/registerActivity_inputEmail"
+                android:maxLength="30"
+                android:inputType="text"
+                android:maxLines="1"
+                android:hint="EMAIL"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:startIconDrawable="@drawable/ic_password_black"
+            app:boxStrokeColor="@color/color_primary_darker"
+            app:hintTextColor="@color/color_primary_darker"
+            android:layout_marginVertical="10dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:maxLines="1"
+                android:maxLength="30"
+                android:id="@+id/registerActivity_inputPassword"
+                android:hint="PASSWORD"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:startIconDrawable="@drawable/ic_password_black"
+            app:boxStrokeColor="@color/color_primary_darker"
+            app:hintTextColor="@color/color_primary_darker"
+            android:layout_marginVertical="10dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:maxLength="30"
+                android:inputType="textPassword"
+                android:id="@+id/registerActivity_inputConfPassword"
+                android:hint="CONFIRM PASSWORD"/>
+        </com.google.android.material.textfield.TextInputLayout>
+    </LinearLayout>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/registerActivity_btnRegis"
+        app:layout_constraintBottom_toTopOf="@id/registerActivity_btnLogin"
+        android:layout_marginHorizontal="15dp"
+        android:paddingVertical="10dp"
+        android:layout_marginVertical="20dp"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        android:text="SIGN UP !"
+        android:background="@drawable/design_rounded_left_rigt_box"/>
+    <androidx.appcompat.widget.AppCompatButton
+        android:layout_width="match_parent"
+        android:background="@drawable/design_rounded_left_rigt_box"
+        android:textColor="@color/white"
+        android:layout_marginBottom="30dp"
+        android:layout_marginHorizontal="15dp"
+        android:layout_marginTop="15dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/registerActivity_btnLogin"
+        android:paddingVertical="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:text="ALREADY HAVE AN ACCOUNT ? SIGN IN"
+        android:textStyle="bold"
+        app:layout_constraintRight_toRightOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">YourChat</string>
+    <string name="title_activity_home">HomeActivity</string>
+    <string name="tab_text_1">Tab 1</string>
+    <string name="tab_text_2">Tab 2</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="tab_title_chat">CHAT</string>
+    <string name="tab_title_friend">FRIEND</string>
+    <string name="title_activity_coba">Coba</string>
+    <string name="title_activity_c_o_b">COBA</string>
+</resources>

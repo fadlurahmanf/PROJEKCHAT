@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:context=".ui.login.LoginActivity">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/logo_yourschat"
+        app:layout_constraintBottom_toTopOf="@id/loginActivity_linearLayout"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginTop="20dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:id="@+id/loginActivity_linearLayout"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="30dp"
+        android:paddingHorizontal="40dp"
+        app:layout_constraintBottom_toTopOf="@id/loginActivity_btnLogin">
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            app:boxStrokeColor="@color/color_primary_darker"
+            android:layout_height="wrap_content"
+            android:textColorHint="@color/color_primary_darker"
+            app:startIconDrawable="@drawable/ic_email_black"
+            app:hintTextColor="@color/color_primary_darker">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/loginActivity_inputUsername"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:hint="EMAIL" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:id="@+id/loginActivity_inputUsernameLayout"
+            android:layout_marginVertical="20dp"
+            android:layout_width="match_parent"
+            app:boxStrokeColor="@color/color_primary_darker"
+            android:layout_height="wrap_content"
+            app:startIconDrawable="@drawable/ic_password_black"
+            app:endIconMode="password_toggle"
+            android:textColorHint="@color/color_primary_darker"
+            app:hintTextColor="@color/color_primary_darker">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/loginActivity_inputPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:textColor="@color/black"
+                android:hint="PASSWORD" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+    </LinearLayout>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/loginActivity_btnLogin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="10dp"
+        android:layout_marginBottom="20dp"
+        android:layout_marginVertical="10dp"
+        android:textStyle="bold"
+        android:paddingVertical="10dp"
+        android:text="SIGN IN !"
+        android:textColor="@color/white"
+        android:background="@drawable/design_rounded_left_rigt_box"
+        app:layout_constraintBottom_toTopOf="@id/loginActivity_btnRegis"
+        tools:layout_editor_absoluteX="10dp"/>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/loginActivity_btnRegis"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="10dp"
+        android:layout_marginBottom="20dp"
+        android:textStyle="bold"
+        android:layout_marginVertical="10dp"
+        android:paddingVertical="10dp"
+        android:text="SIGN UP"
+        android:textColor="@color/white"
+        android:background="@drawable/design_rounded_left_rigt_box"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:layout_editor_absoluteX="10dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
