@@ -22,10 +22,9 @@
         android:id="@+id/mainActivity_viewPager"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/mainActivity_tabLayout" />
+        app:layout_constraintTop_toBottomOf="@id/mainActivity_tabLayout"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/mainActivity_btn_searchFriend"

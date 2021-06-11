@@ -12,6 +12,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.projekchat.R
+import com.example.projekchat.response.SearchResponse
 import com.example.projekchat.response.UserResponse
 import com.example.projekchat.services.auth.AuthenticationService
 import com.example.projekchat.services.firestore.FirestoreService
@@ -27,7 +28,7 @@ class SearchFriendActivity : AppCompatActivity() {
     private lateinit var loading:ProgressBar
     private lateinit var emptytext:TextView
 
-    private var listUserResponse = ArrayList<UserResponse>()
+    private var listUserResponse = ArrayList<SearchResponse>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,18 +40,18 @@ class SearchFriendActivity : AppCompatActivity() {
 
     }
 
-    private fun setAdapter(listUser:ArrayList<UserResponse>){
+    private fun setAdapter(listUser:ArrayList<SearchResponse>){
         recycleView.layoutManager = LinearLayoutManager(this)
         var adapter = SearchFriendAdapter(listUser)
         recycleView.adapter = adapter
 
         adapter.setOnItemClickCallback(object :SearchFriendAdapter.OnItemClickCallback{
             @SuppressLint("ResourceType")
-            override fun onItemClicked(data: UserResponse) {
+            override fun onItemClicked(data: SearchResponse) {
                 //FRIEND STATUS CLICKED
                 var message:String = FirestoreService.FAIL
                 GlobalScope.launch {
-                    var result = sendingInvitation("${getCurrentUser()}", "${data.email}")
+                    var result = sendingInvitation("${getCurrentUser()}", "${data.friendEmail}")
                     if (result==FirestoreService.SUCCESS){
                         //SNACKBAR
                         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
@@ -69,21 +70,33 @@ class SearchFriendActivity : AppCompatActivity() {
         return firestoreService.sendingInvitation("${emailUser}", "$emailFriend")
     }
 
-    private suspend fun getAllUserByKey(keysearch:String): ArrayList<UserResponse> {
+    private suspend fun getAllUserByKey(keysearch:String): ArrayList<SearchResponse> {
         val firestoreService = FirestoreService()
-        val listUser = ArrayList<UserResponse>()
+        val listSearch = ArrayList<SearchResponse>()
         firestoreService.getAllUser()?.forEach {
             if (getCurrentUser()!=it["EMAIL"].toString()){
                 if ("${it["EMAIL"].toString()}".contains("${keysearch}")){
-                    listUser.add(UserResponse(
-                        "${it["FULL_NAME"].toString()}",
-                        "${it["EMAIL"].toString()}",
-                        status = "${it["STATUS"].toString()}"
-                    ))
+                    if (getListFriend().contains("${it["EMAIL"].toString()}")){
+                        listSearch.add(SearchResponse(
+                            friendFullname = "${it["FULL_NAME"].toString()}",
+                            friendEmail = "${it["EMAIL"].toString()}",
+                            friendProfile = "${it["PROFILE_PICTURE"]}",
+                            friendStatus = "${it["STATUS"]}",
+                            status = 1
+                        ))
+                    }else{
+                        listSearch.add(SearchResponse(
+                            friendFullname = "${it["FULL_NAME"].toString()}",
+                            friendEmail = "${it["EMAIL"].toString()}",
+                            friendProfile = "${it["PROFILE_PICTURE"]}",
+                            friendStatus = "${it["STATUS"]}",
+                            status = 0
+                        ))
+                    }
                 }
             }
         }
-        return listUser
+        return listSearch
     }
 
     private fun doSearch() {
@@ -116,9 +129,14 @@ class SearchFriendActivity : AppCompatActivity() {
         })
     }
 
-    private suspend fun getListFriend(){
-//        val firestoreService = FirestoreService()
-//        firestoreService.getListFriedUser("${getCurrentUser()}")
+    private suspend fun getListFriend(): ArrayList<String> {
+        var list = ArrayList<String>()
+        val firestoreService = FirestoreService()
+        var result = firestoreService.getListFriedUser("${getCurrentUser()}")
+        result?.documents?.forEach {
+            list.add(it.id)
+        }
+        return list
     }
 
     private fun getCurrentUser(): String? {

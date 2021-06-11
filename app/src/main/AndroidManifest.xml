@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.example.projekchat">
 
     <application
@@ -9,15 +10,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ProjekChat">
-        <activity android:name=".ui.home.ui.invitation.InvitationActivity"></activity>
-        <activity
-            android:name=".ui.coba.COBA"
-            android:label="@string/title_activity_c_o_b"
-            android:theme="@style/Theme.ProjekChat.NoActionBar" />
-        <activity
-            android:name=".ui.Coba"
-            android:label="@string/title_activity_coba"
-            android:theme="@style/Theme.ProjekChat.NoActionBar" />
+        <activity android:name=".ui.home.ui.chatlog.RoomChatActivity"></activity>
+        <activity android:name=".ui.home.ui.invitation.InvitationActivity" />
         <activity android:name=".ui.home.HomeActivity" />
         <activity android:name=".ui.home.ui.searchfriend.SearchFriendActivity" />
         <activity
@@ -35,6 +29,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name=".services.message.FirebaseNotificationService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

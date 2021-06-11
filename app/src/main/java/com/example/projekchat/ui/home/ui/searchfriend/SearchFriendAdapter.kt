@@ -8,13 +8,14 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.projekchat.R
+import com.example.projekchat.response.SearchResponse
 import com.example.projekchat.response.UserResponse
 
-class SearchFriendAdapter(val listUserResponse: ArrayList<UserResponse>):RecyclerView.Adapter<SearchFriendAdapter.ListViewHolder>() {
+class SearchFriendAdapter(val listUserResponse: ArrayList<SearchResponse>):RecyclerView.Adapter<SearchFriendAdapter.ListViewHolder>() {
     private lateinit var onItemClickCallback:OnItemClickCallback
 
     interface OnItemClickCallback {
-        fun onItemClicked(data:UserResponse)
+        fun onItemClicked(data:SearchResponse)
     }
 
     fun setOnItemClickCallback(onItemClickCallback: OnItemClickCallback){
@@ -35,13 +36,18 @@ class SearchFriendAdapter(val listUserResponse: ArrayList<UserResponse>):Recycle
 
     override fun onBindViewHolder(holder: ListViewHolder, position: Int) {
         var user = listUserResponse[position]
-        holder.fullname_text.text = user.fullName
-        holder.status_text.text = user.status
+        holder.fullname_text.text = user.friendFullname
+        holder.status_text.text = user.friendStatus
         Glide.with(holder.imageProfile).load("").into(holder.imageProfile)
 
-        holder.friendStatus.setOnClickListener{
+        if (user.status==0){
+            holder.friendStatus.setImageResource(R.drawable.ic_person_add_black)
+            holder.friendStatus.setOnClickListener{
+                holder.friendStatus.setImageResource(R.drawable.ic_person_black)
+                onItemClickCallback.onItemClicked(listUserResponse[holder.adapterPosition])
+            }
+        }else if (user.status==1){
             holder.friendStatus.setImageResource(R.drawable.ic_person_black)
-            onItemClickCallback.onItemClicked(listUserResponse[holder.adapterPosition])
         }
     }
 

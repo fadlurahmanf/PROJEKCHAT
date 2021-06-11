@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.widget.Button
 import com.example.projekchat.R
 import com.example.projekchat.services.auth.AuthenticationService
+import com.example.projekchat.services.firestore.FirestoreService
+import com.example.projekchat.services.message.FirebaseMessagingService
 import com.example.projekchat.ui.dialogbox.DialogBoxService
 import com.example.projekchat.ui.home.HomeActivity
 import com.example.projekchat.ui.regis.RegisterActivity
@@ -35,6 +37,7 @@ class LoginActivity : AppCompatActivity() {
                 if (validateAllTextField()){
                     withContext(Dispatchers.Main){dialogBoxService.startLoading()}
                     if (doLogin()==AuthenticationService.SUCCESS){
+                        updateDataUser(setToken()!!)
                         val intent = Intent(this@LoginActivity, HomeActivity::class.java)
                         startActivity(intent)
                         finish()
@@ -49,6 +52,18 @@ class LoginActivity : AppCompatActivity() {
             val intent = Intent(this, RegisterActivity::class.java)
             startActivity(intent)
         }
+    }
+
+    private suspend fun setToken(): String? {
+        val firebasemessagingservice = FirebaseMessagingService()
+        return firebasemessagingservice.getToken()
+    }
+
+    private suspend fun updateDataUser(token:String){
+        var data = HashMap<String, Any>()
+        data.put("TOKEN", token)
+        val firestore = FirestoreService()
+        firestore.setUpdateProfileData(input_username.text.toString(), data)
     }
 
     private suspend fun doLogin(): String {
