@@ -5,17 +5,16 @@
     android:layout_height="match_parent"
     tools:context=".ui.home.HomeActivity">
 
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="message"
-        android:id="@+id/message"/>
-
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/gettoken"
-        android:layout_marginTop="50dp"
-        android:text="SEND MESSAGE"/>
+        android:id="@+id/coba"
+        android:text="coba"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/chatFragment_recylceview"
+        tools:listitem="@layout/item_last_message"/>
 
 </FrameLayout>

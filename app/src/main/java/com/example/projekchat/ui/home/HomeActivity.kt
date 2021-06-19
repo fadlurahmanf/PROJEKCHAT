@@ -1,11 +1,14 @@
 package com.example.projekchat.ui.home
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.AttributeSet
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import androidx.viewpager2.widget.ViewPager2
 import com.example.projekchat.R
 import com.example.projekchat.services.auth.AuthenticationService
@@ -75,6 +78,7 @@ class HomeActivity : AppCompatActivity() {
         }
 
     }
+
 
     private fun initializationLayout() {
         btn_searchFriend = findViewById(R.id.mainActivity_btn_searchFriend)

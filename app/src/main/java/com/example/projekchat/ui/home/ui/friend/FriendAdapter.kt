@@ -8,13 +8,19 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.projekchat.R
 import com.example.projekchat.response.UserResponse
+import com.example.projekchat.utils.OnItemClickCallback
 
-class FriendAdapter(val arrayList: ArrayList<UserResponse>):RecyclerView.Adapter<FriendAdapter.ListViewHolder>() {
-    private lateinit var onItemClickCallback:OnItemClickCallback
+class FriendAdapter():RecyclerView.Adapter<FriendAdapter.ListViewHolder>() {
+    private lateinit var onItemClickCallback: OnItemClickCallback
+    private var listUser:ArrayList<UserResponse> = ArrayList<UserResponse>()
 
-    interface OnItemClickCallback{
-        fun onClicked(data:UserResponse)
+    fun setListUser(list:List<UserResponse>){
+        if (list!=null){
+            this.listUser.clear()
+            this.listUser.addAll(list)
+        }
     }
+
     fun setOnItemClickCallback(onItemClickCallback: OnItemClickCallback){
         this.onItemClickCallback = onItemClickCallback
     }
@@ -32,16 +38,16 @@ class FriendAdapter(val arrayList: ArrayList<UserResponse>):RecyclerView.Adapter
     }
 
     override fun onBindViewHolder(holder: ListViewHolder, position: Int) {
-        var user = arrayList[position]
+        var user = listUser[position]
 
         holder.fullname_text.text = user.fullName
         holder.status.text = user.status
         holder.friendstatus.visibility = View.INVISIBLE
 
-        holder.itemView.setOnClickListener { onItemClickCallback.onClicked(user) }
+        holder.itemView.setOnClickListener { onItemClickCallback.onItemFriendClicked(user) }
     }
 
     override fun getItemCount(): Int {
-        return arrayList.size
+        return listUser.size
     }
 }

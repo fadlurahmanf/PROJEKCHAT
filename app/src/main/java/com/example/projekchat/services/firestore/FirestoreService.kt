@@ -1,12 +1,11 @@
 package com.example.projekchat.services.firestore
 
-import com.example.projekchat.response.MessageResponse
-import com.example.projekchat.response.UserResponse
-import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.QuerySnapshot
+import android.util.Log
+import com.example.projekchat.response.ItemMessageResponse
+import com.google.android.gms.tasks.Task
+import com.google.firebase.firestore.*
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -20,6 +19,9 @@ class FirestoreService {
 
         const val COL_CHAT_ROOM = "CHAT_ROOM"
         const val COL_MESSAGES = "MESSAGES"
+        const val COL_MESSAGE_TO = "TO"
+
+        const val COL_LATEST_MESSAGES = "LATEST_MESSAGES"
     }
     val db = FirebaseFirestore.getInstance()
 
@@ -125,67 +127,74 @@ class FirestoreService {
     }
 
     inner class MessageService(){
-        suspend fun getAllConversation(chatRoomName:String): MutableList<DocumentSnapshot>? {
+
+        fun getAllLastMessage(email: String): Query? {
             try {
-                return db.collection(COL_CHAT_ROOM).document(chatRoomName).collection(COL_MESSAGES)
-                    .orderBy("TIME", Query.Direction.ASCENDING).get().await().documents
+                return db.collection(COL_LATEST_MESSAGES).document(email).collection(COL_MESSAGE_TO).orderBy("time", Query.Direction.DESCENDING)
+            }catch (e:Exception){
+                Log.d("FIRESTORE SERVICE", "${e.message}")
+                return null
+            }
+        }
+
+        fun getListMessageTo(fromEmail:String): CollectionReference? {
+            try {
+                return db.collection(COL_CHAT_ROOM).document(fromEmail).collection(COL_MESSAGE_TO)
             }catch (e:Exception){
                 return null
             }
         }
 
-        suspend fun createRoomChat(chatRoomName: String, emailUser: String, emailFriend: String): String? {
-            var message:String?= FAIL
-            val content = HashMap<String,Any>()
-            content.put("USER_0", emailUser)
-            content.put("USER_1", emailFriend)
+        fun getConversation(emailUser: String, emailFriend: String): Query? {
             try {
-                db.collection(COL_CHAT_ROOM).document(chatRoomName).set(content).await()
-                message = SUCCESS
+                return db.collection(COL_CHAT_ROOM).document(emailUser).collection(COL_MESSAGE_TO).document(emailFriend)
+                    .collection(COL_MESSAGES).orderBy("time", Query.Direction.ASCENDING)
             }catch (e:Exception){
-                message = FAIL
+                return null
             }
-            return message
         }
 
-        suspend fun getNameChatRoom(emailUser: String, emailFriend: String): String {
-            var chatRoomName:String?= null
+        suspend fun createChatRoom(emailUser: String, emailFriend: String){
+            var contentUser = HashMap<String, Any>()
+            contentUser.put("EMAIL", emailUser)
+            val contentFriend = HashMap<String, Any>()
+            contentFriend.put("EMAIL", emailFriend)
             try {
-                var query = db.collection(COL_CHAT_ROOM).get().await().documents
-                query.forEach {
-                    if (it.id=="${emailUser}_${emailFriend}"){
-                        println("MASUK PERTAMA")
-                        chatRoomName="${emailUser}_${emailFriend}"
-                    }else if (it.id=="${emailFriend}_${emailUser}"){
-                        println("MASUK KEDUA")
-                        chatRoomName="${emailFriend}_${emailUser}"
-                    }
-                }
-                if (chatRoomName==null){
-                    chatRoomName="${emailUser}_${emailFriend}"
-                    GlobalScope.launch {
-                        createRoomChat(chatRoomName!!, emailUser, emailFriend)
-                    }
-                }
+                db.collection(COL_CHAT_ROOM).document(emailUser).set(contentUser).await()
+                db.collection(COL_CHAT_ROOM).document(emailFriend).set(contentFriend).await()
+                db.collection(COL_CHAT_ROOM).document(emailUser).collection(COL_MESSAGE_TO).document(emailFriend).set(contentFriend).await()
+                db.collection(COL_CHAT_ROOM).document(emailFriend).collection(COL_MESSAGE_TO).document(emailUser).set(contentUser).await()
             }catch (e:Exception){
-                chatRoomName = null
+                Log.d("ERROR", e.message.toString())
             }
-            return chatRoomName!!
         }
 
-        suspend fun sendMessage(chatRoomName: String,message:String, emailSender: String, emailReceiver: String): String? {
+
+        suspend fun sendMessage(item:ItemMessageResponse) {
+            GlobalScope.launch {
+                // READ NYA
+            }
             var messageResult:String?= FAIL
-            val content = HashMap<String, Any>()
-            content.put("MESSAGE", message)
-            content.put("SENT_BY", emailSender)
-            content.put("TIME", System.currentTimeMillis())
+            var content = HashMap<String, Any>()
+            content.put("message", item.message!!)
+            content.put("sendBy", item.sendBy!!)
+            content.put("sendTo", item.sendTo!!)
+            content.put("time", System.currentTimeMillis())
+            content.put("sendByName", item.sendByName!!)
             try {
-                db.collection(COL_CHAT_ROOM).document(chatRoomName).collection(COL_MESSAGES).add(content).await()
+                db.collection(COL_CHAT_ROOM).document("${item.sendBy}").collection(COL_MESSAGE_TO)
+                    .document("${item.sendTo}").collection(COL_MESSAGES).add(content).await()
+                db.collection(COL_CHAT_ROOM).document("${item.sendTo}").collection(COL_MESSAGE_TO)
+                    .document("${item.sendBy}").collection(COL_MESSAGES).add(content).await()
+                db.collection(COL_LATEST_MESSAGES).document("${item.sendBy}").collection(COL_MESSAGE_TO)
+                        .document("${item.sendTo}").set(content).await()
+                db.collection(COL_LATEST_MESSAGES).document("${item.sendTo}").collection(COL_MESSAGE_TO)
+                        .document("${item.sendBy}").set(content).await()
                 messageResult = SUCCESS
             }catch (e:Exception){
-                messageResult = e.message.toString()
+                Log.d("FIRESTORE SERVICE", "${e.message}")
+                messageResult = FAIL
             }
-            return messageResult
         }
     }
 }

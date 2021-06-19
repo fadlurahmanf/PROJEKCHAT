@@ -133,7 +133,7 @@ class SearchFriendActivity : AppCompatActivity() {
         var list = ArrayList<String>()
         val firestoreService = FirestoreService()
         var result = firestoreService.getListFriedUser("${getCurrentUser()}")
-        result?.documents?.forEach {
+        result?.forEach {
             list.add(it.id)
         }
         return list

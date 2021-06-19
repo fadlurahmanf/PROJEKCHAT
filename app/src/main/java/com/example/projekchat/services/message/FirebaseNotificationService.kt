@@ -26,7 +26,7 @@ class FirebaseNotificationService:FirebaseMessagingService() {
         super.onMessageReceived(remoteMessage)
 
         if (remoteMessage.data.isNotEmpty()) {
-            println("HALOOOOOOOOOOOOOOOOO")
+            println("MASUKKKKKKKK ON MESSAGE RECEIVED")
 
             val map: Map<String, String> = remoteMessage.data
 

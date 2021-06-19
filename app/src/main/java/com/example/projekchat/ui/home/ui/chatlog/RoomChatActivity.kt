@@ -1,10 +1,14 @@
 package com.example.projekchat.ui.home.ui.chatlog
 
+import android.annotation.SuppressLint
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
+import android.widget.Toast
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.volley.DefaultRetryPolicy
@@ -13,10 +17,14 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.example.projekchat.R
 import com.example.projekchat.response.ItemMessageResponse
-import com.example.projekchat.response.MessageResponse
+import com.example.projekchat.response.UserResponse
 import com.example.projekchat.services.auth.AuthenticationService
 import com.example.projekchat.services.firestore.FirestoreService
 import com.example.projekchat.utils.Constant
+import com.google.android.material.snackbar.Snackbar
+import com.xwray.groupie.GroupAdapter
+import com.xwray.groupie.Item
+import com.xwray.groupie.ViewHolder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -29,64 +37,83 @@ class RoomChatActivity : AppCompatActivity() {
     private lateinit var input_message:EditText
     private lateinit var btn_send:Button
 
-    private lateinit var btn:Button
+    private lateinit var viewModel: RoomChatViewModel
 
-    lateinit var messageResponse: MessageResponse
-    var listConversation:ArrayList<ItemMessageResponse> = ArrayList<ItemMessageResponse>()
+    private lateinit var userResponseFriend: UserResponse
+    private lateinit var userResponseUser:UserResponse
+    private lateinit var chatRoomName:String
+
+    private var listMessage = ArrayList<ItemMessageResponse>()
 
     companion object{
-        const val MESSAGE_RESPONSE = "MESSAGE_RESPONSE"
+        const val USER_RESPONSE_FRIEND = "USER_RESPONSE_FRIEND"
+        const val USER_RESPONSE = "USER_RESPONSE"
+        const val CHAT_ROOM_NAME = "CHAT_ROOM_NAME"
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_room_chat)
-        initializeID()
+        initialize()
         initializeData()
 
-        GlobalScope.launch {
-            getAllConversation()
-            withContext(Dispatchers.Main){
-                initializeAdapter()
-            }
-        }
+        val adapter = RoomChatAdapter()
+        recyclerView.layoutManager = LinearLayoutManager(this@RoomChatActivity)
+        recyclerView.setHasFixedSize(true)
+
+        listenChatConversation(userResponseUser.email!!, userResponseFriend.email!!)
+
 
         btn_send.setOnClickListener {
+            var message = input_message.text.toString()
+            input_message.text.clear()
+            getToken(message, userResponseFriend.token!!, userResponseFriend.fullName!!)
             GlobalScope.launch {
-                var token = getInformationReceiverMessage()
-                getToken("${input_message.text.toString()}", "${token}")
-                var firestoreService = FirestoreService()
-                firestoreService.MessageService().sendMessage(messageResponse.chatRoomName, input_message.text.toString(),
-                messageResponse.emailFriend, messageResponse.emailUser)
-                withContext(Dispatchers.Main){
-                    input_message.text.clear()
+                if (userResponseUser!=null&&userResponseFriend!=null){
+                    val item = ItemMessageResponse(
+                            message,
+                            userResponseUser.email,
+                            userResponseFriend.email,
+                            sendByName = userResponseFriend.fullName
+                    )
+                    val db = FirestoreService().MessageService()
+                    db.sendMessage(item)
+                    withContext(Dispatchers.Main){
+                        recyclerView.scrollToPosition(listMessage.size-1)
+                    }
                 }
             }
         }
-
+        adapter.setListMessage(listMessage)
+        recyclerView.adapter = adapter
     }
 
-    private suspend fun getInformationReceiverMessage(): String {
-        val firestoreService = FirestoreService()
-        var result = firestoreService.getProfileData(messageResponse.emailFriend)
-        return result?.get("TOKEN").toString()
-    }
-
-    private fun initializeAdapter() {
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = RoomChatAdapter(listConversation, getEmailUser()!!)
-    }
-
-    private suspend fun getAllConversation(){
-        var firestoreService = FirestoreService().MessageService()
-        firestoreService.getAllConversation(messageResponse.chatRoomName)?.forEach {
-            listConversation.add(
-                ItemMessageResponse(
-                    "${it.get("MESSAGE")}",
-                    "${it.get("SENT_BY")}",
-                    it.getLong("TIME")!!
+    private fun listenChatConversation(emailUser:String, emailFriend:String){
+        var ms = FirestoreService().MessageService()
+        var adapter = RoomChatAdapter()
+        ms.getConversation(emailUser, emailFriend)?.addSnapshotListener { value, error ->
+            if (error!=null){
+                Snackbar.make(this, recyclerView, "${error.message}", Snackbar.LENGTH_SHORT).show()
+            }
+            if (listMessage!=null){
+                listMessage.clear()
+            }
+            value?.forEach {
+                val item = ItemMessageResponse(
+                        it.get("message").toString(),
+                        it.get("sendBy").toString(),
+                        it.get("sendTo").toString(),
+                        it.getLong("time"),
+                        it.id,
+                        it.get("sendByName").toString()
                 )
-            )
+                listMessage.add(item)
+            }
+            adapter.setListMessage(listMessage)
+            recyclerView.adapter = adapter
+            recyclerView.scrollToPosition(listMessage.size-1)
         }
+        adapter.setEmailUser(userResponseUser.email!!)
     }
 
     private fun getEmailUser(): String? {
@@ -96,24 +123,27 @@ class RoomChatActivity : AppCompatActivity() {
 
     private fun initializeData() {
         var extras = intent.extras
-        messageResponse = extras?.getParcelable<MessageResponse>(MESSAGE_RESPONSE) as MessageResponse
+        userResponseFriend = extras?.getParcelable<UserResponse>(USER_RESPONSE_FRIEND) as UserResponse
+        chatRoomName = extras?.get(CHAT_ROOM_NAME).toString()
+        userResponseUser = extras?.getParcelable<UserResponse>(USER_RESPONSE) as UserResponse
     }
 
-    private fun initializeID() {
+    private fun initialize() {
         recyclerView = findViewById(R.id.chatroomActivity_recycleview)
         input_message = findViewById(R.id.chatroomActivity_inputmessage)
         btn_send = findViewById(R.id.chatroomActivity_btn_send)
+
+        viewModel = ViewModelProvider(this, ViewModelProvider.NewInstanceFactory())[RoomChatViewModel::class.java]
     }
 
-    private fun getToken(message:String, token:String){
-//        val token = "eYQbq-TISsOwuEaorbqjm8:APA91bFxp19fGpfpgZjhjAt7JjVbOHmaLq5KkxAI77XMi40rO0a5JVvsb33Gqbhp541wCu9WGcXRx_OeVxn0-7aPPgQPIQ8k0efw50ktiIZw651QqMGUnsU5gdwnMtne_eFrk3akQef1"
-
+    private fun getToken(message: String, token: String, fullName: String){
         val to = JSONObject()
         val data = JSONObject()
+        val tokenBaru = "eYQbq-TISsOwuEaorbqjm8:APA91bFxp19fGpfpgZjhjAt7JjVbOHmaLq5KkxAI77XMi40rO0a5JVvsb33Gqbhp541wCu9WGcXRx_OeVxn0-7aPPgQPIQ8k0efw50ktiIZw651QqMGUnsU5gdwnMtne_eFrk3akQef1"
 
         data.put("hisId", "ID")
 //        data.put("hisImage", )
-        data.put("title", "NAMA")
+        data.put("title", fullName)
         data.put("message", "${message.toString()}")
         data.put("chatId", "ID CHAT")
 
@@ -132,8 +162,9 @@ class RoomChatActivity : AppCompatActivity() {
                     Log.d("TAG", "onResponse: $response")
                 },
                 Response.ErrorListener {
+                    println("erorrrrrrrrrrrrrr ${it.message}")
 
-                    Log.d("TAG", "onError: $it")
+                    Log.d("TAG", "onError: ${it.message}")
                 }) {
             override fun getHeaders(): MutableMap<String, String> {
                 val map: MutableMap<String, String> = HashMap()

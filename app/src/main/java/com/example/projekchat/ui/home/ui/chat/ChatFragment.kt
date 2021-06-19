@@ -1,30 +1,31 @@
 package com.example.projekchat.ui.home.ui.chat
 
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.EditText
-import com.android.volley.DefaultRetryPolicy
-import com.android.volley.Response
-import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.Volley
+import android.widget.TextView
+import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.projekchat.R
-import com.example.projekchat.services.message.FirebaseMessagingService
-import com.example.projekchat.utils.Constant
-import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import org.json.JSONObject
+import com.example.projekchat.response.ItemMessageResponse
+import com.example.projekchat.services.auth.AuthenticationService
+import com.example.projekchat.services.firestore.FirestoreService
 
 
 class ChatFragment : Fragment() {
 
-    private lateinit var btntoken:Button
-    private lateinit var mesage:EditText
+    private lateinit var btn_coba:Button
+    private lateinit var recyclerView: RecyclerView
+
+    private lateinit var viewModel:ChatViewModel
+
+    private var listItemLastMessage = ArrayList<ItemMessageResponse>()
+
+    private var adapter = ChatAdapter()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,65 +41,58 @@ class ChatFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        btntoken = view.findViewById(R.id.gettoken)
-        mesage = view.findViewById(R.id.message)
+        btn_coba = view.findViewById(R.id.coba)
+        initialize(view)
 
-        btntoken.setOnClickListener {
-            getToken(mesage.text.toString())
+        recyclerView.layoutManager = LinearLayoutManager(this.context)
+
+        listenerLastMessage()
+
+        btn_coba.setOnClickListener {
+            listenerLastMessage()
         }
     }
 
-    private fun getToken(message:String){
-        val token = "eYQbq-TISsOwuEaorbqjm8:APA91bFxp19fGpfpgZjhjAt7JjVbOHmaLq5KkxAI77XMi40rO0a5JVvsb33Gqbhp541wCu9WGcXRx_OeVxn0-7aPPgQPIQ8k0efw50ktiIZw651QqMGUnsU5gdwnMtne_eFrk3akQef1"
-
-        val to = JSONObject()
-        val data = JSONObject()
-
-        data.put("hisId", "ID")
-//        data.put("hisImage", )
-        data.put("title", "NAMA")
-        data.put("message", "${message.toString()}")
-        data.put("chatId", "ID CHAT")
-
-        to.put("to", token)
-        to.put("data", data)
-        sendNotification(to)
+    private fun listenerLastMessage(){
+        val fsService = FirestoreService()
+        val fsmessage = FirestoreService().MessageService()
+        fsmessage.getAllLastMessage(getEmailUser()!!)?.addSnapshotListener { value, error ->
+            value?.documents?.forEach {
+                latestMessage["${it.id}"] = ItemMessageResponse(
+                        it.get("message").toString(),
+                        it.get("sendBy").toString(),
+                        it.get("sendTo").toString(),
+                        it.get("time").toString().toLong(),
+                        it.id,
+                        it.get("sendByName").toString()
+                )
+            }
+            refreshRecycleView()
+        }
     }
 
-    private fun sendNotification(to:JSONObject){
-        val request: JsonObjectRequest = object : JsonObjectRequest(
-            Method.POST,
-            Constant.NOTIFICATION_URL,
-            to,
-            Response.Listener { response: JSONObject ->
-
-                Log.d("TAG", "onResponse: $response")
-            },
-            Response.ErrorListener {
-
-                Log.d("TAG", "onError: $it")
-            }) {
-            override fun getHeaders(): MutableMap<String, String> {
-                val map: MutableMap<String, String> = HashMap()
-
-                map["Authorization"] = "key=" + Constant.SERVER_KEY
-                map["Content-type"] = "application/json"
-                return map
-            }
-
-            override fun getBodyContentType(): String {
-                return "application/json"
-            }
+    private fun refreshRecycleView(){
+        listItemLastMessage.clear()
+        adapter.clear()
+        latestMessage.values.forEach {
+            listItemLastMessage.add(it)
         }
+        listItemLastMessage.sortWith(compareByDescending<ItemMessageResponse>{
+            it.message
+        })
+        adapter.setListMessage(listItemLastMessage)
+        recyclerView.adapter = adapter
+    }
+    var latestMessage = HashMap<String, ItemMessageResponse>()
 
-        val requestQueue = Volley.newRequestQueue(this.context)
-        request.retryPolicy = DefaultRetryPolicy(
-            30000,
-            DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-        )
+    private fun initialize(view: View) {
+        recyclerView = view.findViewById(R.id.chatFragment_recylceview)
+        viewModel = ViewModelProvider(this, ViewModelProvider.NewInstanceFactory())[ChatViewModel::class.java]
+    }
 
-        requestQueue.add(request)
+    private fun getEmailUser(): String? {
+        val authenticationService = AuthenticationService()
+        return authenticationService.isUserSignIn()?.email
     }
 
 }

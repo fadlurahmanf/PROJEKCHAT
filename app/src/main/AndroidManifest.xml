@@ -12,7 +12,7 @@
         android:theme="@style/Theme.ProjekChat">
         <activity android:name=".ui.home.ui.chatlog.RoomChatActivity"></activity>
         <activity android:name=".ui.home.ui.invitation.InvitationActivity" />
-        <activity android:name=".ui.home.HomeActivity" />
+        <activity android:name=".ui.home.HomeActivity"/>
         <activity android:name=".ui.home.ui.searchfriend.SearchFriendActivity" />
         <activity
             android:name=".ui.regis.RegisterActivity"

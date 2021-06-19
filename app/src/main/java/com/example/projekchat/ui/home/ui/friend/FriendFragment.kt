@@ -1,7 +1,6 @@
 package com.example.projekchat.ui.home.ui.friend
 
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -9,32 +8,34 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
-import androidx.annotation.RequiresApi
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.projekchat.R
-import com.example.projekchat.response.MessageResponse
 import com.example.projekchat.response.UserResponse
 import com.example.projekchat.services.auth.AuthenticationService
 import com.example.projekchat.services.firestore.FirestoreService
 import com.example.projekchat.ui.home.ui.chatlog.RoomChatActivity
-import com.google.firebase.firestore.DocumentSnapshot
-import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.Dispatchers.Main
+import com.example.projekchat.utils.OnItemClickCallback
+import com.xwray.groupie.GroupAdapter
+import com.xwray.groupie.Item
+import com.xwray.groupie.ViewHolder
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.time.Instant
-import java.time.format.DateTimeFormatter
 
 
-class FriendFragment : Fragment() {
+class FriendFragment : Fragment(), OnItemClickCallback {
 
     private lateinit var emptyText:TextView
     private lateinit var recyclerView: RecyclerView
     private lateinit var loading:ProgressBar
 
-    private var dummylistUserResponse=ArrayList<UserResponse>()
+    private lateinit var viewModel:FriendViewModel
+
+    private lateinit var userResponseUser:UserResponse
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,89 +51,71 @@ class FriendFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initializationID(view)
-        recyclerView.layoutManager = LinearLayoutManager(this.context)
-        recyclerView.adapter = FriendAdapter(dummylistUserResponse)
+        initialization(view)
 
-        GlobalScope.launch {
-            withContext(Main){
-                if (getListFriendOfUser().isEmpty()){
-                    loading.visibility = View.INVISIBLE
-                    emptyText.visibility = View.VISIBLE
-                }else{
-                    loading.visibility = View.INVISIBLE
-                    initializeAdapter()
-                }
+        val adapter = FriendAdapter()
 
-            }
-        }
-
-    }
-
-    private suspend fun initializeAdapter() {
-        recyclerView.layoutManager = LinearLayoutManager(this.context)
-        observe()
-    }
-
-    private suspend fun observe() {
-        var adapter = FriendAdapter(getDetailOfListFriendOfUser())
-        recyclerView.adapter = adapter
-        adapter.setOnItemClickCallback(object :FriendAdapter.OnItemClickCallback{
-            override fun onClicked(data: UserResponse) {
-                val firestoreService = FirestoreService().MessageService()
-                GlobalScope.launch {
-                    var chatRoomName:String = firestoreService.getNameChatRoom(getEmailUser()!!, data.email!!)
-                    var messageResponse = MessageResponse(
-                        emailUser = getEmailUser()!!,
-                        emailFriend = data.email!!,
-                        chatRoomName = chatRoomName!!
-                    )
-                    val intent = Intent(this@FriendFragment.context, RoomChatActivity::class.java)
-                    intent.putExtra(RoomChatActivity.MESSAGE_RESPONSE, messageResponse)
-                    startActivity(intent)
-                }
-            }
-
+        viewModel.userResponseUser.observe(viewLifecycleOwner, Observer {
+            userResponseUser = it
         })
-    }
 
-    private suspend fun getDetailOfListFriendOfUser(): ArrayList<UserResponse> {
-        var firestoreService = FirestoreService()
-        var list = ArrayList<UserResponse>()
-        firestoreService.getAllUser()?.forEach {
-            if (it.id.toString()!="${getEmailUser().toString()}"){
-                if (getListFriendOfUser().contains(it.id.toString())){
-                    list.add(
-                        UserResponse(
-                            fullName = it.get("FULL_NAME").toString(),
-                            imageProfile = it.get("IMAGE_PROFILE").toString(),
-                            status = it.get("STATUS").toString(),
-                            email = it.get("EMAIL").toString()
-                        )
-                    )
-                }
+        viewModel.listfriend.observe(viewLifecycleOwner, Observer {
+            loading.visibility=View.INVISIBLE
+            if (it.isEmpty()){
+                emptyText.visibility=View.VISIBLE
             }
+            adapter.setListUser(it)
+            adapter.notifyDataSetChanged()
+            adapter.setOnItemClickCallback(this)
+        })
+
+        recyclerView.layoutManager = LinearLayoutManager(this.context)
+        recyclerView.adapter = adapter
+
+
+    }
+
+    class ChatFromItem: Item<ViewHolder>(){
+        override fun bind(viewHolder: ViewHolder, position: Int) {
+            var messagetext:TextView = viewHolder.itemView.findViewById<TextView>(R.id.itemchat_message)
+            messagetext.text = "halooooooo"
         }
-        return list
-    }
 
-    private suspend fun getListFriendOfUser(): ArrayList<String> {
-        var firestoreService = FirestoreService()
-        var list = ArrayList<String>()
-        firestoreService.getListFriedUser("${getEmailUser()}")!!.documents.forEach {
-            list.add(it.id.toString())
+        override fun getLayout(): Int {
+            return R.layout.item_chat_right
         }
-        return list
     }
 
-    private fun getEmailUser(): String? {
-        var authenticationService = AuthenticationService()
-        return authenticationService.isUserSignIn()?.email
+    class ChatToItem: Item<ViewHolder>(){
+        override fun bind(viewHolder: ViewHolder, position: Int) {
+            var messagetext:TextView = viewHolder.itemView.findViewById<TextView>(R.id.itemchat_message)
+            messagetext.text = "safafasfafa"
+        }
+
+        override fun getLayout(): Int {
+            return R.layout.item_chat_left
+        }
+
     }
 
-    private fun initializationID(view: View) {
+    private fun initialization(view: View) {
         recyclerView = view.findViewById(R.id.friendFragment_recycleview)
         emptyText = view.findViewById(R.id.friendFragment_empty)
         loading = view.findViewById(R.id.friendFragment_loading)
+
+        viewModel = ViewModelProvider(this).get(FriendViewModel::class.java)
+    }
+
+    override fun onItemFriendClicked(user: UserResponse) {
+        if (user!=null && userResponseUser!=null){
+            GlobalScope.launch {
+                val firestoreService = FirestoreService().MessageService()
+                firestoreService.createChatRoom(userResponseUser.email!!, user.email!!)
+            }
+            val intent = Intent(this.context, RoomChatActivity::class.java)
+            intent.putExtra(RoomChatActivity.USER_RESPONSE_FRIEND, user)
+            intent.putExtra(RoomChatActivity.USER_RESPONSE, userResponseUser)
+            startActivity(intent)
+        }
     }
 }
