@@ -60,12 +60,13 @@ class FriendFragment : Fragment(), OnItemClickCallback {
         })
 
         viewModel.listfriend.observe(viewLifecycleOwner, Observer {
+            println(it.toString())
             loading.visibility=View.INVISIBLE
             if (it.isEmpty()){
                 emptyText.visibility=View.VISIBLE
             }
             adapter.setListUser(it)
-            adapter.notifyDataSetChanged()
+            recyclerView.adapter = adapter
             adapter.setOnItemClickCallback(this)
         })
 
@@ -75,35 +76,16 @@ class FriendFragment : Fragment(), OnItemClickCallback {
 
     }
 
-    class ChatFromItem: Item<ViewHolder>(){
-        override fun bind(viewHolder: ViewHolder, position: Int) {
-            var messagetext:TextView = viewHolder.itemView.findViewById<TextView>(R.id.itemchat_message)
-            messagetext.text = "halooooooo"
-        }
-
-        override fun getLayout(): Int {
-            return R.layout.item_chat_right
-        }
-    }
-
-    class ChatToItem: Item<ViewHolder>(){
-        override fun bind(viewHolder: ViewHolder, position: Int) {
-            var messagetext:TextView = viewHolder.itemView.findViewById<TextView>(R.id.itemchat_message)
-            messagetext.text = "safafasfafa"
-        }
-
-        override fun getLayout(): Int {
-            return R.layout.item_chat_left
-        }
-
-    }
-
     private fun initialization(view: View) {
         recyclerView = view.findViewById(R.id.friendFragment_recycleview)
         emptyText = view.findViewById(R.id.friendFragment_empty)
         loading = view.findViewById(R.id.friendFragment_loading)
 
         viewModel = ViewModelProvider(this).get(FriendViewModel::class.java)
+    }
+
+    override fun onItemLastMessageClicked(userResponse: UserResponse, userFriendResponse: UserResponse) {
+//        TODO("Not yet implemented")
     }
 
     override fun onItemFriendClicked(user: UserResponse) {

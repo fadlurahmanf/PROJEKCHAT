@@ -5,11 +5,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.projekchat.R
 import com.example.projekchat.response.ItemMessageResponse
+import com.example.projekchat.response.UserResponse
+import com.example.projekchat.services.auth.AuthenticationService
+import com.google.android.material.imageview.ShapeableImageView
 
 class RoomChatAdapter():RecyclerView.Adapter<RoomChatAdapter.ListViewHolder>() {
     private var listMessage:ArrayList<ItemMessageResponse> = ArrayList<ItemMessageResponse>()
+    private var mapUser = HashMap<String, UserResponse>()
     private lateinit var emailuser:String
 
     private val MESSAGE_LEFT = 0
@@ -31,6 +36,7 @@ class RoomChatAdapter():RecyclerView.Adapter<RoomChatAdapter.ListViewHolder>() {
 
     inner class ListViewHolder(itemView:View):RecyclerView.ViewHolder(itemView) {
         var messageText:TextView = itemView.findViewById(R.id.itemchat_message)
+        var image:ShapeableImageView = itemView.findViewById(R.id.itemchat_imageProfile)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ListViewHolder {
@@ -46,6 +52,19 @@ class RoomChatAdapter():RecyclerView.Adapter<RoomChatAdapter.ListViewHolder>() {
     override fun onBindViewHolder(holder: ListViewHolder, position: Int) {
         val message = listMessage[position]
         holder.messageText.text = "${message.message}"
+
+        var isSendByMe = sendByMe(message)
+
+        if (isSendByMe){
+            if (message.photoSendBy!="null"){
+                Glide.with(holder.image).load(message.photoSendBy).into(holder.image)
+            }
+        }else{
+            if(message.photoSendTo!="null"){
+                Glide.with(holder.image).load(message.photoSendTo).into(holder.image)
+            }
+        }
+
     }
 
     override fun getItemCount(): Int {
@@ -58,5 +77,20 @@ class RoomChatAdapter():RecyclerView.Adapter<RoomChatAdapter.ListViewHolder>() {
         }else{
             return MESSAGE_LEFT
         }
+    }
+
+    private fun sendByMe(message: ItemMessageResponse): Boolean {
+        var isSendByMe:Boolean = true
+        if (message.sendBy==getEmailUser()){
+            isSendByMe = true
+        }else{
+            isSendByMe = false
+        }
+        return isSendByMe
+    }
+
+    private fun getEmailUser(): String? {
+        val authenticationService = AuthenticationService()
+        return authenticationService.isUserSignIn()?.email
     }
 }

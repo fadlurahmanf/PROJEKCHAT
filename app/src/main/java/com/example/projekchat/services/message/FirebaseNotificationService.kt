@@ -26,8 +26,6 @@ class FirebaseNotificationService:FirebaseMessagingService() {
         super.onMessageReceived(remoteMessage)
 
         if (remoteMessage.data.isNotEmpty()) {
-            println("MASUKKKKKKKK ON MESSAGE RECEIVED")
-
             val map: Map<String, String> = remoteMessage.data
 
             val title = map["title"]
@@ -57,7 +55,7 @@ class FirebaseNotificationService:FirebaseMessagingService() {
         builder.setContentTitle(title)
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.drawable.avatar_man)
             .setAutoCancel(true)
             .setColor(ResourcesCompat.getColor(resources, R.color.color_primary, null))
             .setSound(uri)
@@ -109,7 +107,7 @@ class FirebaseNotificationService:FirebaseMessagingService() {
         val notification = Notification.Builder(this, Constant.CHANNEL_ID)
             .setContentTitle(title)
             .setContentText(message)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.drawable.logo_yourschat)
             .setAutoCancel(true)
             .setColor(ResourcesCompat.getColor(resources, R.color.color_primary, null))
             .setContentIntent(pendingIntent)

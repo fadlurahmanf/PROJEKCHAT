@@ -1,13 +1,19 @@
 package com.example.projekchat.ui.regis
 
+import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
+import android.widget.ImageView
 import com.example.projekchat.R
 import com.example.projekchat.services.firestore.FirestoreService
 import com.example.projekchat.services.auth.AuthenticationService
+import com.example.projekchat.services.storage.FirebaseStorageServices
 import com.example.projekchat.ui.dialogbox.DialogBoxService
+import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.*
 
@@ -18,6 +24,13 @@ class RegisterActivity : AppCompatActivity(), View.OnClickListener {
     private lateinit var inputConfPassword:TextInputEditText
     private lateinit var btn_regis:Button
     private lateinit var btn_login:Button
+    private lateinit var image:ShapeableImageView
+
+    private var imageProfileUser: Uri? = null
+
+    companion object{
+        const val REQUEST_CODE_PICK_IMAGE_FROM_GALLERY = 100
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,8 +49,13 @@ class RegisterActivity : AppCompatActivity(), View.OnClickListener {
                             withContext(Dispatchers.Main){dialogBoxService.startLoading()}
                             if (doRegisAuth() == AuthenticationService.SUCCESS){
                                 if (doRegisToFirestore()== FirestoreService.SUCCESS){
+                                    if (imageProfileUser!=null){
+                                        saveImageToFirestore(imageProfileUser!!, inputEmail.text.toString())
+                                    }
                                     withContext(Dispatchers.Main){
                                         clearAllText()
+                                        image.setContentPadding(15,15,15,15)
+                                        image.setImageResource(R.drawable.ic_person_black)
                                         dialogBoxService.successDialog("SUCCESSFULLY REGISTER")
                                     }
                                 }else{
@@ -57,7 +75,30 @@ class RegisterActivity : AppCompatActivity(), View.OnClickListener {
             R.id.registerActivity_btnLogin->{
                 onBackPressed()
             }
+            R.id.registerActivity_inputProfileImage->{
+                pickImageFromGallery()
+            }
         }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode==Activity.RESULT_OK && requestCode== REQUEST_CODE_PICK_IMAGE_FROM_GALLERY && data!=null){
+            image.setImageURI(data?.data)
+            image.setContentPadding(0,0,0,0)
+            imageProfileUser = data?.data
+        }
+    }
+
+    private fun pickImageFromGallery() {
+        val intent = Intent(Intent.ACTION_PICK)
+        intent.type = "image/*"
+        startActivityForResult(intent, REQUEST_CODE_PICK_IMAGE_FROM_GALLERY)
+    }
+
+    private fun saveImageToFirestore(image:Uri, email:String){
+        val service = FirebaseStorageServices()
+        service.saveImage(image, email)
     }
 
     private suspend fun validateAllEditText(): Boolean {
@@ -108,6 +149,7 @@ class RegisterActivity : AppCompatActivity(), View.OnClickListener {
         user.put("FULL_NAME", inputFullname.text.toString())
         user.put("EMAIL", inputEmail.text.toString())
         user.put("PASSWORD", inputPassword.text.toString())
+        user.put("PROFILE_IMAGE", "${inputEmail.text.toString()}.png")
 
         val firestoreService = FirestoreService()
         return firestoreService.setProfileData(user)
@@ -127,8 +169,10 @@ class RegisterActivity : AppCompatActivity(), View.OnClickListener {
         inputConfPassword = findViewById(R.id.registerActivity_inputConfPassword)
         btn_regis = findViewById(R.id.registerActivity_btnRegis)
         btn_login = findViewById(R.id.registerActivity_btnLogin)
+        image = findViewById(R.id.registerActivity_inputProfileImage)
 
         btn_regis.setOnClickListener(this)
         btn_login.setOnClickListener(this)
+        image.setOnClickListener(this)
     }
 }

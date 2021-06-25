@@ -8,12 +8,17 @@
     tools:context=".ui.regis.RegisterActivity">
 
     <com.google.android.material.imageview.ShapeableImageView
-        android:layout_width="70dp"
-        android:layout_height="70dp"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:padding="2dp"
+        app:strokeWidth="2dp"
+        app:contentPadding="15dp"
+        app:strokeColor="@color/color_primary_darker"
         android:id="@+id/registerActivity_inputProfileImage"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/registerActivity_layoutInput"
         android:src="@drawable/ic_person_black"
+        app:shapeAppearanceOverlay="@style/image_circle"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"/>
 

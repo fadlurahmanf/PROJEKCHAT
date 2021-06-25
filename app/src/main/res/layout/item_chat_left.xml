@@ -6,12 +6,14 @@
     android:layout_marginVertical="10dp"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <ImageView
+    <com.google.android.material.imageview.ShapeableImageView
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:id="@+id/itemchat_imageProfile"
         android:src="@drawable/avatar_man"
-        android:layout_marginRight="10dp"
+        android:scaleType="centerCrop"
+        app:shapeAppearanceOverlay="@style/image_circle"
+        android:layout_marginRight="12dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"/>
     <TextView
@@ -25,6 +27,7 @@
         android:background="@drawable/design_chat_left"
         android:paddingHorizontal="10dp"
         android:paddingVertical="5dp"
+        android:layout_marginLeft="12dp"
         android:textColor="@color/white"
         android:text="MESSAGE"/>
 

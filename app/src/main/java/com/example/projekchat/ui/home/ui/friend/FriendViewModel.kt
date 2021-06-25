@@ -60,7 +60,11 @@ class FriendViewModel:ViewModel() {
         _listFriendName.value?.forEach {
             var query = firestoreService.getProfileData(it)
             var userResponse = UserResponse(
-                    query?.get("FULL_NAME")?.toString(), query?.get("EMAIL")?.toString(), status = query?.get("STATUS")?.toString(), imageProfile = query?.get("IMAGE_PROFILE")?.toString(), token = query?.get("TOKEN").toString()
+                    query?.get("FULL_NAME")?.toString(),
+                    query?.get("EMAIL")?.toString(),
+                    status = query?.get("STATUS")?.toString(),
+                    imageProfile = query?.get("PROFILE_IMAGE")?.toString(),
+                    token = query?.get("TOKEN").toString()
             )
             list.add(userResponse)
         }

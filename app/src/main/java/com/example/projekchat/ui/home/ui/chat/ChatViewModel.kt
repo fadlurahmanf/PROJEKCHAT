@@ -3,54 +3,37 @@ package com.example.projekchat.ui.home.ui.chat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.projekchat.response.ItemMessageResponse
+import com.example.projekchat.response.UserResponse
 import com.example.projekchat.services.auth.AuthenticationService
 import com.example.projekchat.services.firestore.FirestoreService
+import com.example.projekchat.services.storage.FirebaseStorageServices
+import kotlinx.coroutines.launch
 
 class ChatViewModel:ViewModel() {
-    var _listMessageTo = MutableLiveData<List<String>>()
-    var listMessageTo:LiveData<List<String>> = _listMessageTo
 
-    var _listLastMessage = MutableLiveData<List<ItemMessageResponse>>()
-    var listLastMessage :LiveData<List<ItemMessageResponse>> = _listLastMessage
+    private var _listProfileData = MutableLiveData<HashMap<String, UserResponse>>()
+    var listProfileData:LiveData<HashMap<String, UserResponse>> = _listProfileData
 
     init {
-//        getListMessageTo(getEmailUser()!!)
-    }
-
-    fun getListMessageTo(email:String){
-        val fsmessage = FirestoreService().MessageService()
-        val list = ArrayList<String>()
-        fsmessage.getListMessageTo(email)?.addSnapshotListener { value, error ->
-            println("valueeeeeee ${value?.size()}")
-            println("errorrrrrr nya ${error?.message}")
-            value?.documents?.forEach {
-                println(it.id)
-                list.add(it.id)
-            }
-            _listMessageTo.postValue(list)
+        viewModelScope.launch {
+            getAllProfileData()
         }
     }
 
-    fun getLastMessage(toEmail:List<String>){
-//        val fsmessage = FirestoreService().MessageService()
-//        var list = ArrayList<ItemMessageResponse>()
-//        toEmail.forEach {
-//            fsmessage.getLastConversation(getEmailUser()!!, it)?.addSnapshotListener { value, error ->
-//                value?.documents?.forEach {
-//                    println(it.id)
-//                    list.add(ItemMessageResponse(
-//                            it.get("message").toString(),
-//                            it.get("sendBy").toString(),
-//                            it.get("sendTo").toString(),
-//                            it.getLong("time"),
-//                            it.id
-//                    ))
-//                }
-//                _listLastMessage.postValue(list)
-//            }
-//        }
-//        return listLastMessage
+    suspend fun getAllProfileData(){
+        val firestoreService = FirestoreService()
+        val storageServices = FirebaseStorageServices()
+        var map = HashMap<String, UserResponse>()
+        firestoreService.getAllUser()?.forEach {
+            var item = UserResponse(
+                it.get("FULL_NAME").toString(),
+                it.id,
+            )
+            map["${it.id}"] = item
+        }
+        _listProfileData.postValue(map)
     }
 
     fun getEmailUser(): String? {

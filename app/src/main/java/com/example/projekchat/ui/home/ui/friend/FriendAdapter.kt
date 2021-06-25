@@ -6,9 +6,11 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.projekchat.R
 import com.example.projekchat.response.UserResponse
 import com.example.projekchat.utils.OnItemClickCallback
+import com.google.android.material.imageview.ShapeableImageView
 
 class FriendAdapter():RecyclerView.Adapter<FriendAdapter.ListViewHolder>() {
     private lateinit var onItemClickCallback: OnItemClickCallback
@@ -27,7 +29,7 @@ class FriendAdapter():RecyclerView.Adapter<FriendAdapter.ListViewHolder>() {
 
     inner class ListViewHolder(itemView:View):RecyclerView.ViewHolder(itemView) {
         var fullname_text:TextView = itemView.findViewById(R.id.itemFriend_fullname)
-        var imageprofile:ImageView = itemView.findViewById(R.id.itemFriend_imageProfile)
+        var imageprofile:ShapeableImageView = itemView.findViewById(R.id.itemFriend_imageProfile)
         var status:TextView = itemView.findViewById(R.id.itemFriend_status)
         var friendstatus:ImageView = itemView.findViewById(R.id.itemFriend_friendStatus)
     }
@@ -42,9 +44,14 @@ class FriendAdapter():RecyclerView.Adapter<FriendAdapter.ListViewHolder>() {
 
         holder.fullname_text.text = user.fullName
         holder.status.text = user.status
+        if (user.imageProfile!="null"){
+            Glide.with(holder.imageprofile).load(user.imageProfile).into(holder.imageprofile)
+        }
         holder.friendstatus.visibility = View.INVISIBLE
 
-        holder.itemView.setOnClickListener { onItemClickCallback.onItemFriendClicked(user) }
+        holder.itemView.setOnClickListener {
+            onItemClickCallback.onItemFriendClicked(user)
+        }
     }
 
     override fun getItemCount(): Int {

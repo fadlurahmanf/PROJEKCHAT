@@ -8,6 +8,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -61,8 +62,8 @@ class RoomChatActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this@RoomChatActivity)
         recyclerView.setHasFixedSize(true)
 
+        updateTotalUnread(userResponseUser.email!!, userResponseFriend.email!!)
         listenChatConversation(userResponseUser.email!!, userResponseFriend.email!!)
-
 
         btn_send.setOnClickListener {
             var message = input_message.text.toString()
@@ -74,7 +75,12 @@ class RoomChatActivity : AppCompatActivity() {
                             message,
                             userResponseUser.email,
                             userResponseFriend.email,
-                            sendByName = userResponseFriend.fullName
+                            sendByName = userResponseUser.fullName,
+                            sendToName = userResponseFriend.fullName,
+                            photoSendBy = userResponseUser.imageProfile,
+                            photoSendTo = userResponseFriend.imageProfile,
+                            tokenSendBy = userResponseUser.token,
+                            tokenSendTo = userResponseFriend.token,
                     )
                     val db = FirestoreService().MessageService()
                     db.sendMessage(item)
@@ -86,6 +92,12 @@ class RoomChatActivity : AppCompatActivity() {
         }
         adapter.setListMessage(listMessage)
         recyclerView.adapter = adapter
+    }
+
+    private fun updateTotalUnread(emailUser: String, emailFriend: String) {
+        val fsmessage = FirestoreService().MessageService()
+        fsmessage.updateTotalUnread(emailUser, emailFriend)
+
     }
 
     private fun listenChatConversation(emailUser:String, emailFriend:String){
@@ -105,7 +117,14 @@ class RoomChatActivity : AppCompatActivity() {
                         it.get("sendTo").toString(),
                         it.getLong("time"),
                         it.id,
-                        it.get("sendByName").toString()
+                        it.get("sendByName").toString(),
+                        it.get("sendToName").toString(),
+                        "",
+                        it.get("photoSendBy").toString(),
+                        it.get("photoSendTo").toString(),
+                        it.get("tokenSendBy").toString(),
+                        it.get("tokenSendTo").toString()
+
                 )
                 listMessage.add(item)
             }
@@ -113,7 +132,7 @@ class RoomChatActivity : AppCompatActivity() {
             recyclerView.adapter = adapter
             recyclerView.scrollToPosition(listMessage.size-1)
         }
-        adapter.setEmailUser(userResponseUser.email!!)
+        adapter.setEmailUser(getEmailUser().toString())
     }
 
     private fun getEmailUser(): String? {
@@ -159,12 +178,10 @@ class RoomChatActivity : AppCompatActivity() {
                 to,
                 Response.Listener { response: JSONObject ->
 
-                    Log.d("TAG", "onResponse: $response")
+                    Log.d("SEND_NOTIFICATION", "onResponse: $response")
                 },
                 Response.ErrorListener {
-                    println("erorrrrrrrrrrrrrr ${it.message}")
-
-                    Log.d("TAG", "onError: ${it.message}")
+                    Log.d("SEND_NOTIFICATION", "onError: ${it.message}")
                 }) {
             override fun getHeaders(): MutableMap<String, String> {
                 val map: MutableMap<String, String> = HashMap()

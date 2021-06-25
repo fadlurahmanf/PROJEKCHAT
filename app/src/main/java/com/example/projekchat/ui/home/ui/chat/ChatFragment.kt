@@ -1,5 +1,6 @@
 package com.example.projekchat.ui.home.ui.chat
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -7,16 +8,24 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.projekchat.R
 import com.example.projekchat.response.ItemMessageResponse
+import com.example.projekchat.response.UserResponse
 import com.example.projekchat.services.auth.AuthenticationService
 import com.example.projekchat.services.firestore.FirestoreService
+import com.example.projekchat.ui.home.ui.chatlog.RoomChatActivity
+import com.example.projekchat.utils.OnItemClickCallback
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
-class ChatFragment : Fragment() {
+class ChatFragment : Fragment(), OnItemClickCallback {
 
     private lateinit var btn_coba:Button
     private lateinit var recyclerView: RecyclerView
@@ -24,8 +33,10 @@ class ChatFragment : Fragment() {
     private lateinit var viewModel:ChatViewModel
 
     private var listItemLastMessage = ArrayList<ItemMessageResponse>()
+    private var mapUserResponse = HashMap<String, UserResponse>()
 
     private var adapter = ChatAdapter()
+    var latestMessage = HashMap<String, ItemMessageResponse>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,15 +57,23 @@ class ChatFragment : Fragment() {
 
         recyclerView.layoutManager = LinearLayoutManager(this.context)
 
+//        GlobalScope.launch {
+//            withContext(Dispatchers.Main){
+//                viewModel.listProfileData.observe(viewLifecycleOwner, Observer {
+//                    adapter.setMapLastMessage(it)
+//                    refreshRecycleView()
+//                })
+//            }
+//        }
+
         listenerLastMessage()
 
         btn_coba.setOnClickListener {
-            listenerLastMessage()
         }
+        btn_coba.visibility = View.INVISIBLE
     }
 
     private fun listenerLastMessage(){
-        val fsService = FirestoreService()
         val fsmessage = FirestoreService().MessageService()
         fsmessage.getAllLastMessage(getEmailUser()!!)?.addSnapshotListener { value, error ->
             value?.documents?.forEach {
@@ -64,7 +83,13 @@ class ChatFragment : Fragment() {
                         it.get("sendTo").toString(),
                         it.get("time").toString().toLong(),
                         it.id,
-                        it.get("sendByName").toString()
+                        it.get("sendByName").toString(),
+                        it.get("sendToName").toString(),
+                        it.get("totalUnread").toString(),
+                        it.get("photoSendBy").toString(),
+                        it.get("photoSendTo").toString(),
+                        it.get("tokenSendBy").toString(),
+                        it.get("tokenSendTo").toString()
                 )
             }
             refreshRecycleView()
@@ -77,13 +102,14 @@ class ChatFragment : Fragment() {
         latestMessage.values.forEach {
             listItemLastMessage.add(it)
         }
+        //SORTING BASED ON TIME
         listItemLastMessage.sortWith(compareByDescending<ItemMessageResponse>{
-            it.message
+            it.time
         })
         adapter.setListMessage(listItemLastMessage)
+        adapter.setOnItemClickCallback(this)
         recyclerView.adapter = adapter
     }
-    var latestMessage = HashMap<String, ItemMessageResponse>()
 
     private fun initialize(view: View) {
         recyclerView = view.findViewById(R.id.chatFragment_recylceview)
@@ -94,5 +120,19 @@ class ChatFragment : Fragment() {
         val authenticationService = AuthenticationService()
         return authenticationService.isUserSignIn()?.email
     }
+
+    override fun onItemLastMessageClicked(userResponse: UserResponse, userFriendResponse: UserResponse) {
+        if (userResponse !=null && userFriendResponse!=null){
+            val intent = Intent(this.context, RoomChatActivity::class.java)
+            intent.putExtra(RoomChatActivity.USER_RESPONSE_FRIEND, userFriendResponse)
+            intent.putExtra(RoomChatActivity.USER_RESPONSE, userResponse)
+            startActivity(intent)
+        }
+    }
+
+    override fun onItemFriendClicked(user: UserResponse) {
+//        TODO("Not yet implemented")
+    }
+
 
 }

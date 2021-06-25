@@ -3,16 +3,17 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingHorizontal="20dp"
-    android:paddingVertical="20dp"
+    android:paddingVertical="13dp"
+    android:layout_marginTop="10dp"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <com.google.android.material.imageview.ShapeableImageView
         android:layout_width="80dp"
         android:layout_height="80dp"
-        android:background="@color/color_primary_pastel"
         android:id="@+id/itemFriend_imageProfile"
-        style="@style/image_circle"
         android:src="@drawable/avatar_man"
+        android:scaleType="centerCrop"
+        app:shapeAppearanceOverlay="@style/image_circle"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>

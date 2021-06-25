@@ -145,6 +145,11 @@ class FirestoreService {
             }
         }
 
+        fun updateTotalUnread(emailUser: String, emailFriend: String){
+            db.collection(COL_LATEST_MESSAGES).document(emailUser).collection(COL_MESSAGE_TO).document(emailFriend)
+                    .update("totalUnread", 0)
+        }
+
         fun getConversation(emailUser: String, emailFriend: String): Query? {
             try {
                 return db.collection(COL_CHAT_ROOM).document(emailUser).collection(COL_MESSAGE_TO).document(emailFriend)
@@ -171,30 +176,53 @@ class FirestoreService {
 
 
         suspend fun sendMessage(item:ItemMessageResponse) {
+            println("${item.photoSendBy}   ${item.photoSendTo}")
             GlobalScope.launch {
-                // READ NYA
+                var totalUnread:Int = 0
+                var query= db.collection(COL_LATEST_MESSAGES).document("${item.sendBy}").collection(COL_MESSAGE_TO)
+                        .document("${item.sendTo}").get().await()
+
+                if (query.exists()){
+                    if (query.get("totalUnread")==null){
+                        totalUnread = 1
+                    }else{
+                        totalUnread = query.get("totalUnread").toString().toInt()
+                        totalUnread = totalUnread+1
+                    }
+                    Log.d("FIRESTORE SERVICE", "QUERY EXIST ${totalUnread}")
+                }else{
+                    Log.d("FIRESTORE SERVICE", "QUERY TIDAK EXIST")
+                    totalUnread = 1
+                }
+
+                var content = createContent(item, totalUnread)
+                println("TOTAL UNREAD $totalUnread content ${item.toString()}")
+                Log.d("FIRESTORE SERVICE", "CONTENT ${content.toString()}")
+                db.collection(COL_CHAT_ROOM).document("${item.sendBy}").collection(COL_MESSAGE_TO)
+                        .document("${item.sendTo}").collection(COL_MESSAGES).add(content).await()
+                db.collection(COL_CHAT_ROOM).document("${item.sendTo}").collection(COL_MESSAGE_TO)
+                        .document("${item.sendBy}").collection(COL_MESSAGES).add(content).await()
+                db.collection(COL_LATEST_MESSAGES).document("${item.sendBy}").collection(COL_MESSAGE_TO)
+                        .document("${item.sendTo}").set(content).await()
+                db.collection(COL_LATEST_MESSAGES).document("${item.sendTo}").collection(COL_MESSAGE_TO)
+                        .document("${item.sendBy}").set(content).await()
             }
-            var messageResult:String?= FAIL
+        }
+
+        private fun createContent(item: ItemMessageResponse, totalUnread:Int):HashMap<String, Any> {
             var content = HashMap<String, Any>()
             content.put("message", item.message!!)
             content.put("sendBy", item.sendBy!!)
             content.put("sendTo", item.sendTo!!)
             content.put("time", System.currentTimeMillis())
             content.put("sendByName", item.sendByName!!)
-            try {
-                db.collection(COL_CHAT_ROOM).document("${item.sendBy}").collection(COL_MESSAGE_TO)
-                    .document("${item.sendTo}").collection(COL_MESSAGES).add(content).await()
-                db.collection(COL_CHAT_ROOM).document("${item.sendTo}").collection(COL_MESSAGE_TO)
-                    .document("${item.sendBy}").collection(COL_MESSAGES).add(content).await()
-                db.collection(COL_LATEST_MESSAGES).document("${item.sendBy}").collection(COL_MESSAGE_TO)
-                        .document("${item.sendTo}").set(content).await()
-                db.collection(COL_LATEST_MESSAGES).document("${item.sendTo}").collection(COL_MESSAGE_TO)
-                        .document("${item.sendBy}").set(content).await()
-                messageResult = SUCCESS
-            }catch (e:Exception){
-                Log.d("FIRESTORE SERVICE", "${e.message}")
-                messageResult = FAIL
-            }
+            content.put("sendToName", item.sendToName!!)
+            content.put("photoSendBy", item.photoSendBy.toString())
+            content.put("photoSendTo", item.photoSendTo.toString())
+            content.put("tokenSendBy", item.tokenSendBy!!)
+            content.put("tokenSendTo", item.tokenSendTo!!)
+            content.put("totalUnread", totalUnread)
+            return content
         }
     }
 }
