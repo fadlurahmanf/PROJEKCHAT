@@ -9,6 +9,7 @@
     <com.google.android.material.imageview.ShapeableImageView
         android:layout_width="80dp"
         android:layout_height="80dp"
+        android:src="@drawable/avatar_man"
         android:background="@color/color_primary_pastel"
         android:id="@+id/itemInvitation_image"
         app:shapeAppearanceOverlay="@style/image_rounded_all_corner"

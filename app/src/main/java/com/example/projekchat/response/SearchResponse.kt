@@ -5,5 +5,6 @@ data class SearchResponse(
     var friendEmail:String?="",
     var friendProfile:String?="",
     var friendStatus:String?="",
-    var status:Int?=0
+    var status:Int?=0,
+    var friendToken:String?=""
 )

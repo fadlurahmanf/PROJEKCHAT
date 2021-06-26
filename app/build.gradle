@@ -59,4 +59,6 @@ dependencies {
 
     implementation "com.github.lisawray.groupie:groupie:2.0.0"
     implementation "com.github.lisawray.groupie:groupie-databinding:2.9.0"
+
+    implementation 'com.airbnb.android:lottie:3.7.0'
 }

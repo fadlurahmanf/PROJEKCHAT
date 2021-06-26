@@ -8,12 +8,29 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.projekchat.R
+import com.example.projekchat.response.UserResponse
 import com.google.android.material.imageview.ShapeableImageView
 
-class InvitationAdapter(var listUser:ArrayList<String>):RecyclerView.Adapter<InvitationAdapter.ListViewHolder>() {
+class InvitationAdapter():RecyclerView.Adapter<InvitationAdapter.ListViewHolder>() {
     private lateinit var onItemClickCallback:OnItemClickCallback
+    private var mapUser = HashMap<String, UserResponse>()
+    private var listInvitation = ArrayList<UserResponse>()
+
+    fun setMapUser(map:HashMap<String, UserResponse>){
+        if (map!=null){
+            mapUser = map
+        }
+    }
+
+    fun setListUser(list:List<UserResponse>){
+        if (list!=null){
+            listInvitation.clear()
+            listInvitation.addAll(list)
+        }
+    }
+
     interface OnItemClickCallback{
-        fun onItemClicked(user:String, position: Int)
+        fun onItemClicked(userResponseFriend: UserResponse)
     }
 
     fun setOnItemClickCallback(onItemClickCallback: OnItemClickCallback){
@@ -31,17 +48,21 @@ class InvitationAdapter(var listUser:ArrayList<String>):RecyclerView.Adapter<Inv
         return ListViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: ListViewHolder, position: Int) {
-        var user = listUser[position]
 
-        holder.fullName_text.text = user
-        Glide.with(holder.image).load("https://firebasestorage.googleapis.com/v0/b/fir-kotlin-37cdf.appspot.com/o/USER_DATA%2Ftffajari%40gmail.com.png?alt=media&token=2a06e1d8-6107-4737-9d9c-cec56be9fd0f").into(holder.image)
+    override fun onBindViewHolder(holder: ListViewHolder, position: Int) {
+        var user = listInvitation[position]
+
+        holder.fullName_text.text = user.fullName
+        if (user.imageProfile.toString()!="null"){
+            Glide.with(holder.image).load(user.imageProfile).into(holder.image)
+        }
         holder.icon_accepted.setOnClickListener {
-            onItemClickCallback.onItemClicked(listUser[holder.adapterPosition], position)
+            onItemClickCallback.onItemClicked(listInvitation[holder.adapterPosition])
+            listInvitation.remove(listInvitation[holder.adapterPosition])
         }
     }
 
     override fun getItemCount(): Int {
-        return listUser.size
+        return listInvitation.size
     }
 }

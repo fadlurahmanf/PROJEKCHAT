@@ -9,6 +9,8 @@ import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.projekchat.R
@@ -29,29 +31,42 @@ class SearchFriendActivity : AppCompatActivity() {
     private lateinit var emptytext:TextView
 
     private var listUserResponse = ArrayList<SearchResponse>()
+    private var mapUser = HashMap<String, UserResponse>()
+    private var adapter = SearchFriendAdapter()
+
+    private lateinit var viewModel: SearchFriendViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search_friend)
         initializationLayout()
 
-        doSearch()
-        setAdapter(listUserResponse)
+        viewModel.mapUser.observe(this, Observer {
+            mapUser = it
+            doSearch()
+        })
 
     }
 
     private fun setAdapter(listUser:ArrayList<SearchResponse>){
-        recycleView.layoutManager = LinearLayoutManager(this)
-        var adapter = SearchFriendAdapter(listUser)
+        adapter.setListUser(listUser)
         recycleView.adapter = adapter
 
         adapter.setOnItemClickCallback(object :SearchFriendAdapter.OnItemClickCallback{
             @SuppressLint("ResourceType")
             override fun onItemClicked(data: SearchResponse) {
                 //FRIEND STATUS CLICKED
-                var message:String = FirestoreService.FAIL
+                var userResponseFriend = UserResponse(
+                        data.friendFullname,
+                        data.friendEmail,
+                        "",
+                        data.friendStatus,
+                        data.friendProfile,
+                        data.friendToken
+                )
+                var userResponse = mapUser["${getCurrentUser()}"]
                 GlobalScope.launch {
-                    var result = sendingInvitation("${getCurrentUser()}", "${data.friendEmail}")
+                    var result = sendingInvitation(userResponse!!, userResponseFriend)
                     if (result==FirestoreService.SUCCESS){
                         //SNACKBAR
                         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
@@ -65,9 +80,9 @@ class SearchFriendActivity : AppCompatActivity() {
 
         })
     }
-    private suspend fun sendingInvitation(emailUser:String, emailFriend:String): String {
+    private suspend fun sendingInvitation(invitationBy:UserResponse, invitationTo:UserResponse): String {
         val firestoreService =FirestoreService()
-        return firestoreService.sendingInvitation("${emailUser}", "$emailFriend")
+        return firestoreService.sendingInvitation(invitationBy, invitationTo)
     }
 
     private suspend fun getAllUserByKey(keysearch:String): ArrayList<SearchResponse> {
@@ -78,19 +93,21 @@ class SearchFriendActivity : AppCompatActivity() {
                 if ("${it["EMAIL"].toString()}".contains("${keysearch}")){
                     if (getListFriend().contains("${it["EMAIL"].toString()}")){
                         listSearch.add(SearchResponse(
-                            friendFullname = "${it["FULL_NAME"].toString()}",
-                            friendEmail = "${it["EMAIL"].toString()}",
-                            friendProfile = "${it["PROFILE_IMAGE"]}",
-                            friendStatus = it?.get("STATUS").toString(),
-                            status = 1
+                                friendFullname = "${it["FULL_NAME"].toString()}",
+                                friendEmail = "${it["EMAIL"].toString()}",
+                                friendProfile = "${it["PROFILE_IMAGE"]}",
+                                friendStatus = it?.get("STATUS").toString(),
+                                status = 1,
+                                friendToken = it?.get("TOKEN").toString()
                         ))
                     }else{
                         listSearch.add(SearchResponse(
-                            friendFullname = "${it["FULL_NAME"].toString()}",
-                            friendEmail = "${it["EMAIL"].toString()}",
-                            friendProfile = "${it["PROFILE_IMAGE"]}",
-                            friendStatus = it?.get("STATUS").toString(),
-                            status = 0
+                                friendFullname = "${it["FULL_NAME"].toString()}",
+                                friendEmail = "${it["EMAIL"].toString()}",
+                                friendProfile = "${it["PROFILE_IMAGE"]}",
+                                friendStatus = it?.get("STATUS").toString(),
+                                status = 0,
+                                friendToken = it?.get("TOKEN").toString()
                         ))
                     }
                 }
@@ -149,6 +166,11 @@ class SearchFriendActivity : AppCompatActivity() {
         recycleView = findViewById(R.id.searchFriendActivity_recycleView)
         emptytext = findViewById(R.id.searchFriendActivity_empty)
         loading = findViewById(R.id.searchFriendActivity_loading)
+
+        viewModel = ViewModelProvider(this, ViewModelProvider.NewInstanceFactory())[SearchFriendViewModel::class.java]
+
+        recycleView.layoutManager = LinearLayoutManager(this)
+        recycleView.adapter = adapter
     }
 
 

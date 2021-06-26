@@ -2,10 +2,9 @@ package com.example.projekchat.services.firestore
 
 import android.util.Log
 import com.example.projekchat.response.ItemMessageResponse
-import com.google.android.gms.tasks.Task
+import com.example.projekchat.response.UserResponse
 import com.google.firebase.firestore.*
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -71,13 +70,17 @@ class FirestoreService {
         }
     }
 
-    suspend fun sendingInvitation(emailUser:String, emailFriend:String): String {
+    suspend fun sendingInvitation(invitationBy:UserResponse, invitationTo:UserResponse): String {
         var message = FAIL
         var mapUser = HashMap<String, Any>()
-        mapUser.put("INVITATION_BY", emailUser)
+        mapUser.put("EMAIL", invitationBy.email!!)
+        mapUser.put("FULL_NAME", invitationBy.fullName!!)
+        mapUser.put("PROFILE_IMAGE", invitationBy.imageProfile!!)
+        mapUser.put("TOKEN", invitationBy.token!!)
+        mapUser.put("STATUS", invitationBy.status!!)
         try {
-            db.collection(COL_USERDATA).document(emailFriend).collection(COL_INVITATION)
-                .document(emailUser).set(mapUser).await()
+            db.collection(COL_USERDATA).document(invitationTo.email!!).collection(COL_INVITATION)
+                .document(invitationBy.email!!).set(mapUser).await()
             message = SUCCESS
             return message
         }catch (e:Exception){
@@ -95,15 +98,23 @@ class FirestoreService {
         }
     }
 
-    suspend fun setFriend(emailUser: String, emailFriend: String): String {
+    suspend fun setFriend(userResponseUser:UserResponse, userResponseFriend:UserResponse): String {
         var message = FAIL
         var mapEmailUser = HashMap<String, Any>()
-        mapEmailUser.put("EMAIL", emailUser)
+        mapEmailUser.put("EMAIL", userResponseUser.email!!)
+        mapEmailUser.put("FULL_NAME", userResponseUser.fullName!!)
+        mapEmailUser.put("TOKEN", userResponseUser.token!!)
+        mapEmailUser.put("STATUS", userResponseUser.status!!)
+        mapEmailUser.put("PROFILE_IMAGE", userResponseUser.imageProfile!!)
         var mapEmailFriend = HashMap<String, Any>()
-        mapEmailFriend.put("EMAIL", emailFriend)
+        mapEmailFriend.put("EMAIL", userResponseFriend.email!!)
+        mapEmailFriend.put("FULL_NAME", userResponseFriend.fullName!!)
+        mapEmailFriend.put("TOKEN", userResponseFriend.token!!)
+        mapEmailFriend.put("STATUS", userResponseFriend.status!!)
+        mapEmailFriend.put("PROFILE_IMAGE", userResponseFriend.imageProfile!!)
         try {
-            db.collection(COL_USERDATA).document(emailUser).collection(COL_FRIENDS).document(emailFriend).set(mapEmailFriend).await()
-            db.collection(COL_USERDATA).document(emailFriend).collection(COL_FRIENDS).document(emailUser).set(mapEmailUser).await()
+            db.collection(COL_USERDATA).document(userResponseUser.email!!).collection(COL_FRIENDS).document(userResponseFriend.email!!).set(mapEmailFriend).await()
+            db.collection(COL_USERDATA).document(userResponseFriend.email!!).collection(COL_FRIENDS).document(userResponseUser.email!!).set(mapEmailUser).await()
             message = SUCCESS
             return message
         }catch (e:Exception){

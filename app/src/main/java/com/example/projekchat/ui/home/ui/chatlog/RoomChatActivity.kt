@@ -68,7 +68,7 @@ class RoomChatActivity : AppCompatActivity() {
         btn_send.setOnClickListener {
             var message = input_message.text.toString()
             input_message.text.clear()
-            getToken(message, userResponseFriend.token!!, userResponseFriend.fullName!!)
+            getToken(message, userResponseFriend.token!!, userResponseUser.fullName!!)
             GlobalScope.launch {
                 if (userResponseUser!=null&&userResponseFriend!=null){
                     val item = ItemMessageResponse(

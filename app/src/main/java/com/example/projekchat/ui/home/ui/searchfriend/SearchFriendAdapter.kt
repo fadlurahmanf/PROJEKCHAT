@@ -11,8 +11,16 @@ import com.example.projekchat.R
 import com.example.projekchat.response.SearchResponse
 import com.example.projekchat.response.UserResponse
 
-class SearchFriendAdapter(val listUserResponse: ArrayList<SearchResponse>):RecyclerView.Adapter<SearchFriendAdapter.ListViewHolder>() {
+class SearchFriendAdapter():RecyclerView.Adapter<SearchFriendAdapter.ListViewHolder>() {
     private lateinit var onItemClickCallback:OnItemClickCallback
+    private var listUserResponse: ArrayList<SearchResponse> = ArrayList<SearchResponse>()
+
+    fun setListUser(list:List<SearchResponse>){
+        if (list!=null){
+            listUserResponse.clear()
+            listUserResponse.addAll(list)
+        }
+    }
 
     interface OnItemClickCallback {
         fun onItemClicked(data:SearchResponse)
