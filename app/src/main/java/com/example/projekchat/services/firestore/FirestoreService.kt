@@ -37,6 +37,12 @@ class FirestoreService {
         }
     }
 
+    suspend fun updateProfileImage(photoName:String, email:String){
+        var content = HashMap<String, Any>()
+        content.put("PROFILE_IMAGE", photoName)
+        db.collection(COL_USERDATA).document(email).update("PROFILE_IMAGE", photoName).await()
+    }
+
     suspend fun getProfileData(email:String): DocumentSnapshot? {
         try {
             return db.collection(COL_USERDATA).document(email).get().await()

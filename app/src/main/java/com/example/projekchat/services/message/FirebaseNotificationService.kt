@@ -11,7 +11,9 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.content.res.ResourcesCompat
 import com.example.projekchat.R
+import com.example.projekchat.response.UserResponse
 import com.example.projekchat.ui.home.ui.chat.ChatFragment
+import com.example.projekchat.ui.home.ui.chatlog.RoomChatActivity
 import com.example.projekchat.utils.Constant
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
@@ -34,8 +36,18 @@ class FirebaseNotificationService:FirebaseMessagingService() {
 //            val hisImage = map["hisImage"]
             val chatId = map["chatId"]
 
+            val userEmail = map["userEmail"]
+            val userName = map["userName"]
+            val userToken = map["userToken"]
+            val userImage = map["userImage"]
+
+            val friendEmail = map["friendEmail"]
+            val friendName = map["friendName"]
+            val friendToken = map["friendToken"]
+            val friendImage = map["friendImage"]
+
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O){
-                createOreoNotification(title!!, message!!, hisId!!, chatId!!)
+                createOreoNotification(title!!, message!!, hisId!!, chatId!!, userEmail!!, userName!!, userToken!!, userImage!!, friendEmail!!, friendName!!, friendToken!!, friendImage!!)
             }
             else createNormalNotification(title!!, message!!, hisId!!, chatId!!)
 
@@ -75,11 +87,36 @@ class FirebaseNotificationService:FirebaseMessagingService() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createOreoNotification(
-        title: String,
-        message: String,
-        hisId: String,
-        chatId: String
+            title: String,
+            message: String,
+            hisId: String,
+            chatId: String,
+            userEmail: String,
+            userName: String,
+            userToken: String,
+            userImage: String,
+            friendEmail: String,
+            friendName: String,
+            friendToken: String,
+            friendImage: String,
     ) {
+
+        val userResponseUser = UserResponse(
+                userName,
+                userEmail,
+                "",
+                "",
+                userImage,
+                userToken
+        )
+        val userResponseFriend = UserResponse(
+                friendName,
+                friendEmail,
+                "",
+                "",
+                friendImage,
+                friendToken
+        )
 
         val channel = NotificationChannel(
             Constant.CHANNEL_ID,
@@ -95,14 +132,15 @@ class FirebaseNotificationService:FirebaseMessagingService() {
         val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         manager.createNotificationChannel(channel)
 
-        val intent = Intent(this, ChatFragment::class.java)
+        val intent = Intent(this, RoomChatActivity::class.java)
 
-        intent.putExtra("hisId", hisId)
-//        intent.putExtra("hisImage", hisImage)
-        intent.putExtra("chatId", chatId)
+        //TERBALIK KARENA YANG NGIRIM DAN PENERIMA BEDA
+        intent.putExtra(RoomChatActivity.USER_RESPONSE, userResponseFriend)
+        intent.putExtra(RoomChatActivity.USER_RESPONSE_FRIEND, userResponseUser)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
 
         val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT)
+
 
         val notification = Notification.Builder(this, Constant.CHANNEL_ID)
             .setContentTitle(title)

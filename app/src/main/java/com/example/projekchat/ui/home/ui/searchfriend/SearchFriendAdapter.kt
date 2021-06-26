@@ -37,8 +37,12 @@ class SearchFriendAdapter(val listUserResponse: ArrayList<SearchResponse>):Recyc
     override fun onBindViewHolder(holder: ListViewHolder, position: Int) {
         var user = listUserResponse[position]
         holder.fullname_text.text = user.friendFullname
-        holder.status_text.text = user.friendStatus
-        Glide.with(holder.imageProfile).load("").into(holder.imageProfile)
+        if (user.friendStatus!="null"){
+            holder.status_text.text = user.friendStatus
+        }
+        if (user.friendProfile!="null"){
+            Glide.with(holder.imageProfile).load(user.friendProfile).into(holder.imageProfile)
+        }
 
         if (user.status==0){
             holder.friendStatus.setImageResource(R.drawable.ic_person_add_black)

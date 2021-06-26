@@ -1,5 +1,6 @@
 package com.example.projekchat.ui.home.ui.invitation
 
+import android.annotation.SuppressLint
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
@@ -11,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.projekchat.R
 import com.example.projekchat.services.auth.AuthenticationService
 import com.example.projekchat.services.firestore.FirestoreService
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.firestore.DocumentSnapshot
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -52,6 +54,7 @@ class InvitationActivity : AppCompatActivity() {
         recyclerView.adapter = adapter
 
         adapter.setOnItemClickCallback(object :InvitationAdapter.OnItemClickCallback{
+            @SuppressLint("WrongConstant")
             override fun onItemClicked(user: String, position: Int) {
                 GlobalScope.launch {
                     FirestoreService().setFriend("${getCurrentUser().toString()}", "${user.toString()}")
@@ -60,6 +63,7 @@ class InvitationActivity : AppCompatActivity() {
                         if (result==FirestoreService.SUCCESS){
                             var list = getAllInvitation()
                             recyclerView.adapter = InvitationAdapter(list)
+                            Snackbar.make(this@InvitationActivity.recyclerView, "ADDED TO FRIEND", Snackbar.ANIMATION_MODE_SLIDE).show()
                         }
                     }
                 }

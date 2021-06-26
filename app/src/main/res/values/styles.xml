@@ -7,5 +7,8 @@
         <item name="cornerSize">50%</item>
         <item name="borderWidth">5dp</item>
     </style>
+    <style name="image_rounded_all_corner">
+        <item name="cornerSize">10%</item>
+    </style>
 
 </resources>

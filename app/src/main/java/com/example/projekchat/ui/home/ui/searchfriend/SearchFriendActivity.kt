@@ -80,16 +80,16 @@ class SearchFriendActivity : AppCompatActivity() {
                         listSearch.add(SearchResponse(
                             friendFullname = "${it["FULL_NAME"].toString()}",
                             friendEmail = "${it["EMAIL"].toString()}",
-                            friendProfile = "${it["PROFILE_PICTURE"]}",
-                            friendStatus = "${it["STATUS"]}",
+                            friendProfile = "${it["PROFILE_IMAGE"]}",
+                            friendStatus = it?.get("STATUS").toString(),
                             status = 1
                         ))
                     }else{
                         listSearch.add(SearchResponse(
                             friendFullname = "${it["FULL_NAME"].toString()}",
                             friendEmail = "${it["EMAIL"].toString()}",
-                            friendProfile = "${it["PROFILE_PICTURE"]}",
-                            friendStatus = "${it["STATUS"]}",
+                            friendProfile = "${it["PROFILE_IMAGE"]}",
+                            friendStatus = it?.get("STATUS").toString(),
                             status = 0
                         ))
                     }

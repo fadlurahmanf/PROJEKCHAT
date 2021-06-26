@@ -166,6 +166,16 @@ class RoomChatActivity : AppCompatActivity() {
         data.put("message", "${message.toString()}")
         data.put("chatId", "ID CHAT")
 
+        data.put("userEmail", userResponseUser.email)
+        data.put("userName", userResponseUser.fullName)
+        data.put("userToken", userResponseUser.token)
+        data.put("userImage", userResponseUser.imageProfile)
+
+        data.put("friendEmail", userResponseFriend.email)
+        data.put("friendName", userResponseFriend.fullName)
+        data.put("friendToken", userResponseFriend.token)
+        data.put("friendImage", userResponseFriend.imageProfile)
+
         to.put("to", token)
         to.put("data", data)
         sendNotification(to)
@@ -177,7 +187,6 @@ class RoomChatActivity : AppCompatActivity() {
                 Constant.NOTIFICATION_URL,
                 to,
                 Response.Listener { response: JSONObject ->
-
                     Log.d("SEND_NOTIFICATION", "onResponse: $response")
                 },
                 Response.ErrorListener {

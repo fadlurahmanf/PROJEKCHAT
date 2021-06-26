@@ -13,7 +13,7 @@
         android:id="@+id/itemFriend_imageProfile"
         android:src="@drawable/avatar_man"
         android:scaleType="centerCrop"
-        app:shapeAppearanceOverlay="@style/image_circle"
+        app:shapeAppearanceOverlay="@style/image_rounded_all_corner"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
@@ -39,7 +39,7 @@
         app:layout_constraintStart_toEndOf="@id/itemFriend_imageProfile"
         app:layout_constraintLeft_toRightOf="@id/itemFriend_imageProfile"
         app:layout_constraintTop_toBottomOf="@id/itemFriend_fullname"
-        android:text="STATUS"
+        android:text=""
         android:layout_marginTop="12dp"
         android:layout_marginLeft="20dp"/>
 

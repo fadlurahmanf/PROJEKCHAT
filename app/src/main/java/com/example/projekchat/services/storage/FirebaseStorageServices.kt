@@ -2,6 +2,7 @@ package com.example.projekchat.services.storage
 
 import android.net.Uri
 import android.util.Log
+import com.example.projekchat.services.firestore.FirestoreService
 import com.google.android.gms.tasks.Task
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
@@ -13,9 +14,14 @@ class FirebaseStorageServices {
     }
     private val storageServices = FirebaseStorage.getInstance()
 
-    fun saveImage(image:Uri, email:String){
+    suspend fun saveImage(image:Uri?, email:String) {
         try {
-            storageServices.getReference().child("${COL_USER_DATA}/${email}.png").putFile(image)
+            if (image!=null){
+                storageServices.getReference().child("${COL_USER_DATA}/${email}.png").putFile(image).await()
+                var downloadURL = storageServices.getReference().child("$COL_USER_DATA/${email}.png").downloadUrl.await()
+                val firestoreService = FirestoreService()
+                firestoreService.updateProfileImage(downloadURL.toString(), email)
+            }
         }catch (e:Exception){
             Log.d("FIREBASE STORAGE", "${e.message}")
         }

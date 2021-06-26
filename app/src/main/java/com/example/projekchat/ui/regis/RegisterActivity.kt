@@ -50,7 +50,9 @@ class RegisterActivity : AppCompatActivity(), View.OnClickListener {
                             if (doRegisAuth() == AuthenticationService.SUCCESS){
                                 if (doRegisToFirestore()== FirestoreService.SUCCESS){
                                     if (imageProfileUser!=null){
-                                        saveImageToFirestore(imageProfileUser!!, inputEmail.text.toString())
+                                        saveImageToFirestore(imageProfileUser, inputEmail.text.toString())
+                                    }else{
+                                        saveImageToFirestore(null, "null")
                                     }
                                     withContext(Dispatchers.Main){
                                         clearAllText()
@@ -96,7 +98,7 @@ class RegisterActivity : AppCompatActivity(), View.OnClickListener {
         startActivityForResult(intent, REQUEST_CODE_PICK_IMAGE_FROM_GALLERY)
     }
 
-    private fun saveImageToFirestore(image:Uri, email:String){
+    private suspend fun saveImageToFirestore(image:Uri?, email:String){
         val service = FirebaseStorageServices()
         service.saveImage(image, email)
     }
