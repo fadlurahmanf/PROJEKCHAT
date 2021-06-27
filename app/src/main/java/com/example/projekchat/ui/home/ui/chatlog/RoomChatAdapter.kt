@@ -14,8 +14,8 @@ import com.google.android.material.imageview.ShapeableImageView
 
 class RoomChatAdapter():RecyclerView.Adapter<RoomChatAdapter.ListViewHolder>() {
     private var listMessage:ArrayList<ItemMessageResponse> = ArrayList<ItemMessageResponse>()
-    private var mapUser = HashMap<String, UserResponse>()
-    private lateinit var emailuser:String
+    private lateinit var userResponseUser: UserResponse
+    private lateinit var userResponseFriend:UserResponse
 
     private val MESSAGE_LEFT = 0
     private val MESSAGE_RIGHT = 1
@@ -27,16 +27,34 @@ class RoomChatAdapter():RecyclerView.Adapter<RoomChatAdapter.ListViewHolder>() {
         }
     }
 
-
-    fun setEmailUser(email:String){
-        if (email!=null){
-            this.emailuser = email
+    fun setUserResponseUser(user:UserResponse){
+        if (user!=null){
+            userResponseUser = user
         }
     }
 
-    inner class ListViewHolder(itemView:View):RecyclerView.ViewHolder(itemView) {
+    fun setUserResponseFriend(user:UserResponse){
+        if (user!=null){
+            userResponseFriend = user
+        }
+    }
+
+    inner class ListViewHolder(itemView:View, viewType: Int):RecyclerView.ViewHolder(itemView) {
         var messageText:TextView = itemView.findViewById(R.id.itemchat_message)
         var image:ShapeableImageView = itemView.findViewById(R.id.itemchat_imageProfile)
+        init {
+            if (userResponseUser!=null&&userResponseFriend!=null){
+                if (viewType==MESSAGE_RIGHT){
+                    if (userResponseUser.imageProfile!="null"){
+                        Glide.with(image).load(userResponseUser.imageProfile).into(image)
+                    }
+                }else{
+                    if (userResponseFriend.imageProfile!="null"){
+                        Glide.with(image).load(userResponseFriend.imageProfile).into(image)
+                    }
+                }
+            }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ListViewHolder {
@@ -46,24 +64,12 @@ class RoomChatAdapter():RecyclerView.Adapter<RoomChatAdapter.ListViewHolder>() {
         }else{
             view = LayoutInflater.from(parent.context).inflate(R.layout.item_chat_right, parent, false)
         }
-        return ListViewHolder(view)
+        return ListViewHolder(view, viewType)
     }
 
     override fun onBindViewHolder(holder: ListViewHolder, position: Int) {
         val message = listMessage[position]
         holder.messageText.text = "${message.message}"
-
-        var isSendByMe = sendByMe(message)
-
-        if (isSendByMe){
-            if (message.photoSendBy!="null"){
-                Glide.with(holder.image).load(message.photoSendBy).into(holder.image)
-            }
-        }else{
-            if(message.photoSendTo!="null"){
-                Glide.with(holder.image).load(message.photoSendTo).into(holder.image)
-            }
-        }
 
     }
 
@@ -72,21 +78,11 @@ class RoomChatAdapter():RecyclerView.Adapter<RoomChatAdapter.ListViewHolder>() {
     }
 
     override fun getItemViewType(position: Int): Int {
-        if (listMessage[position].sendBy==emailuser){
+        if (listMessage[position].sendBy==getEmailUser()){
             return MESSAGE_RIGHT
         }else{
             return MESSAGE_LEFT
         }
-    }
-
-    private fun sendByMe(message: ItemMessageResponse): Boolean {
-        var isSendByMe:Boolean = true
-        if (message.sendBy==getEmailUser()){
-            isSendByMe = true
-        }else{
-            isSendByMe = false
-        }
-        return isSendByMe
     }
 
     private fun getEmailUser(): String? {

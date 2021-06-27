@@ -12,6 +12,10 @@ import kotlinx.coroutines.launch
 class FriendViewModel:ViewModel() {
     private var _userResponseUser = MutableLiveData<UserResponse>()
     var userResponseUser:LiveData<UserResponse> = _userResponseUser
+
+    private var _mapAllUser = MutableLiveData<HashMap<String, UserResponse>>()
+    var mapAllUser:LiveData<HashMap<String, UserResponse>> = _mapAllUser
+
     private var _listFriend = MutableLiveData<List<UserResponse>>()
     var listfriend : LiveData<List<UserResponse>> = _listFriend
 
@@ -20,59 +24,46 @@ class FriendViewModel:ViewModel() {
 
     init {
         viewModelScope.launch {
-            getOurData(getCurrentUser()!!)
-            getAllFriendNamed()
-            getAllFriendData()
+            getAllUserData()
+            getAllFriend()
         }
+    }
+
+    private suspend fun getAllFriend(){
+        val fsService = FirestoreService()
+        var list = ArrayList<UserResponse>()
+        fsService.getListFriedUser(getCurrentUser()!!)?.forEach {
+            list.add(UserResponse(
+                    it.get("FULL_NAME").toString(),
+                    it.get("EMAIL").toString(),
+                    "",
+                    it.get("STATUS").toString(),
+                    it.get("PROFILE_IMAGE").toString(),
+                    it.get("TOKEN").toString()
+            ))
+        }
+        _listFriend.postValue(list)
+    }
+
+    private suspend fun getAllUserData(){
+        val fsService = FirestoreService()
+        var map = HashMap<String, UserResponse>()
+        fsService.getAllUser()?.forEach {
+            map["${it.id}"] = UserResponse(
+                    it.get("FULL_NAME").toString(),
+                    it.get("EMAIL").toString(),
+                    "",
+                    it.get("STATUS").toString(),
+                    it.get("PROFILE_IMAGE").toString(),
+                    it.get("TOKEN").toString()
+            )
+        }
+        _mapAllUser.postValue(map)
     }
 
     private fun getCurrentUser(): String? {
         val authenticationService = AuthenticationService()
         return authenticationService.isUserSignIn()?.email
 
-    }
-
-    private  suspend fun getOurData(email:String) {
-        val firestoreService = FirestoreService()
-        val result = firestoreService.getProfileData(email)
-        var userResponse = UserResponse(
-                result?.get("FULL_NAME").toString(),
-                result?.get("EMAIL").toString(),
-                result?.get("PASSWORD").toString(),
-                result?.get("STATUS").toString(),
-                result?.get("IMAGE_PROFILE").toString(),
-        )
-        _userResponseUser.postValue(userResponse)
-    }
-
-    suspend fun getAllFriendNamed(){
-        val firestoreService = FirestoreService()
-        val list = ArrayList<String>()
-        firestoreService.getListFriedUser(getEmailUser()!!)?.forEach {
-            list.add(it.id)
-        }
-        _listFriendName.value = list
-    }
-
-    suspend fun getAllFriendData(){
-        val firestoreService = FirestoreService()
-        val list = ArrayList<UserResponse>()
-        _listFriendName.value?.forEach {
-            var query = firestoreService.getProfileData(it)
-            var userResponse = UserResponse(
-                    query?.get("FULL_NAME")?.toString(),
-                    query?.get("EMAIL")?.toString(),
-                    status = query?.get("STATUS")?.toString(),
-                    imageProfile = query?.get("PROFILE_IMAGE")?.toString(),
-                    token = query?.get("TOKEN").toString()
-            )
-            list.add(userResponse)
-        }
-        _listFriend.value = list
-    }
-
-    fun getEmailUser(): String? {
-        val authenticationService = AuthenticationService()
-        return authenticationService.isUserSignIn()?.email
     }
 }

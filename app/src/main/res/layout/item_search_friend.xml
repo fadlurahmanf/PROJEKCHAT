@@ -39,7 +39,7 @@
         app:layout_constraintStart_toEndOf="@id/itemFriend_imageProfile"
         app:layout_constraintLeft_toRightOf="@id/itemFriend_imageProfile"
         app:layout_constraintTop_toBottomOf="@id/itemFriend_fullname"
-        android:text=""
+        android:text="Busy"
         android:layout_marginTop="12dp"
         android:layout_marginLeft="20dp"/>
 

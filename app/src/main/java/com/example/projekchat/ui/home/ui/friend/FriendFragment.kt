@@ -36,6 +36,9 @@ class FriendFragment : Fragment(), OnItemClickCallback {
     private lateinit var viewModel:FriendViewModel
 
     private lateinit var userResponseUser:UserResponse
+    private var mapAllUser = HashMap<String, UserResponse>()
+
+    private var adapter = FriendAdapter()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,14 +56,15 @@ class FriendFragment : Fragment(), OnItemClickCallback {
         super.onViewCreated(view, savedInstanceState)
         initialization(view)
 
-        val adapter = FriendAdapter()
-
-        viewModel.userResponseUser.observe(viewLifecycleOwner, Observer {
-            userResponseUser = it
+        viewModel.mapAllUser.observe(viewLifecycleOwner, Observer {
+            mapAllUser = it
         })
 
+        observeListFriend()
+    }
+
+    private fun observeListFriend(){
         viewModel.listfriend.observe(viewLifecycleOwner, Observer {
-            println(it.toString())
             loading.visibility=View.INVISIBLE
             if (it.isEmpty()){
                 emptyText.visibility=View.VISIBLE
@@ -69,11 +73,6 @@ class FriendFragment : Fragment(), OnItemClickCallback {
             recyclerView.adapter = adapter
             adapter.setOnItemClickCallback(this)
         })
-
-        recyclerView.layoutManager = LinearLayoutManager(this.context)
-        recyclerView.adapter = adapter
-
-
     }
 
     private fun initialization(view: View) {
@@ -81,7 +80,15 @@ class FriendFragment : Fragment(), OnItemClickCallback {
         emptyText = view.findViewById(R.id.friendFragment_empty)
         loading = view.findViewById(R.id.friendFragment_loading)
 
+        recyclerView.layoutManager = LinearLayoutManager(this.context)
+        recyclerView.adapter = adapter
+
         viewModel = ViewModelProvider(this).get(FriendViewModel::class.java)
+    }
+
+    private fun getCurrentUser(): String? {
+        val authenticationService = AuthenticationService()
+        return authenticationService.isUserSignIn()?.email
     }
 
     override fun onItemLastMessageClicked(userResponse: UserResponse, userFriendResponse: UserResponse) {
@@ -89,13 +96,17 @@ class FriendFragment : Fragment(), OnItemClickCallback {
     }
 
     override fun onItemFriendClicked(user: UserResponse) {
-        if (user!=null && userResponseUser!=null){
+        if (user!=null && mapAllUser.isNotEmpty()){
+            var userResponseFriend = mapAllUser["${user.email}"]
+            var userResponseUser = mapAllUser["${getCurrentUser()}"]
+//            println(userResponseFriend.toString())
+//            println(userResponseUser.toString())
             GlobalScope.launch {
                 val firestoreService = FirestoreService().MessageService()
-                firestoreService.createChatRoom(userResponseUser.email!!, user.email!!)
+                firestoreService.createChatRoom(userResponseUser?.email!!, userResponseFriend?.email!!)
             }
             val intent = Intent(this.context, RoomChatActivity::class.java)
-            intent.putExtra(RoomChatActivity.USER_RESPONSE_FRIEND, user)
+            intent.putExtra(RoomChatActivity.USER_RESPONSE_FRIEND, userResponseFriend)
             intent.putExtra(RoomChatActivity.USER_RESPONSE, userResponseUser)
             startActivity(intent)
         }

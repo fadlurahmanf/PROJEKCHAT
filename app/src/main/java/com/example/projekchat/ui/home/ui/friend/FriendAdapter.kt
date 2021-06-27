@@ -43,7 +43,9 @@ class FriendAdapter():RecyclerView.Adapter<FriendAdapter.ListViewHolder>() {
         var user = listUser[position]
 
         holder.fullname_text.text = user.fullName
-        holder.status.text = user.status
+        if (user.status!="null"){
+            holder.status.text = user.status
+        }
         if (user.imageProfile!="null"){
             Glide.with(holder.imageprofile).load(user.imageProfile).into(holder.imageprofile)
         }

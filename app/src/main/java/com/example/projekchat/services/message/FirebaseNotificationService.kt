@@ -1,9 +1,6 @@
 package com.example.projekchat.services.message
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
+import android.app.*
 import android.content.Intent
 import android.media.RingtoneManager
 import android.os.Build
@@ -133,6 +130,7 @@ class FirebaseNotificationService:FirebaseMessagingService() {
         manager.createNotificationChannel(channel)
 
         val intent = Intent(this, RoomChatActivity::class.java)
+
 
         //TERBALIK KARENA YANG NGIRIM DAN PENERIMA BEDA
         intent.putExtra(RoomChatActivity.USER_RESPONSE, userResponseFriend)

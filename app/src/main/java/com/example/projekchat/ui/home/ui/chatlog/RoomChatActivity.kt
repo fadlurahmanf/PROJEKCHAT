@@ -46,10 +46,11 @@ class RoomChatActivity : AppCompatActivity() {
 
     private var listMessage = ArrayList<ItemMessageResponse>()
 
+    private var adapter = RoomChatAdapter()
+
     companion object{
         const val USER_RESPONSE_FRIEND = "USER_RESPONSE_FRIEND"
         const val USER_RESPONSE = "USER_RESPONSE"
-        const val CHAT_ROOM_NAME = "CHAT_ROOM_NAME"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,10 +59,6 @@ class RoomChatActivity : AppCompatActivity() {
         initialize()
         initializeData()
 
-        val adapter = RoomChatAdapter()
-        recyclerView.layoutManager = LinearLayoutManager(this@RoomChatActivity)
-        recyclerView.setHasFixedSize(true)
-
         updateTotalUnread(userResponseUser.email!!, userResponseFriend.email!!)
         listenChatConversation(userResponseUser.email!!, userResponseFriend.email!!)
 
@@ -69,6 +66,8 @@ class RoomChatActivity : AppCompatActivity() {
             var message = input_message.text.toString()
             input_message.text.clear()
             getToken(message, userResponseFriend.token!!, userResponseUser.fullName!!)
+            println(userResponseFriend.toString())
+            println(userResponseUser.toString())
             GlobalScope.launch {
                 if (userResponseUser!=null&&userResponseFriend!=null){
                     val item = ItemMessageResponse(
@@ -102,7 +101,6 @@ class RoomChatActivity : AppCompatActivity() {
 
     private fun listenChatConversation(emailUser:String, emailFriend:String){
         var ms = FirestoreService().MessageService()
-        var adapter = RoomChatAdapter()
         ms.getConversation(emailUser, emailFriend)?.addSnapshotListener { value, error ->
             if (error!=null){
                 Snackbar.make(this, recyclerView, "${error.message}", Snackbar.LENGTH_SHORT).show()
@@ -132,7 +130,6 @@ class RoomChatActivity : AppCompatActivity() {
             recyclerView.adapter = adapter
             recyclerView.scrollToPosition(listMessage.size-1)
         }
-        adapter.setEmailUser(getEmailUser().toString())
     }
 
     private fun getEmailUser(): String? {
@@ -141,16 +138,21 @@ class RoomChatActivity : AppCompatActivity() {
     }
 
     private fun initializeData() {
-        var extras = intent.extras
-        userResponseFriend = extras?.getParcelable<UserResponse>(USER_RESPONSE_FRIEND) as UserResponse
-        chatRoomName = extras?.get(CHAT_ROOM_NAME).toString()
-        userResponseUser = extras?.getParcelable<UserResponse>(USER_RESPONSE) as UserResponse
+        userResponseFriend = intent?.getParcelableExtra<UserResponse>(USER_RESPONSE_FRIEND) as UserResponse
+        userResponseUser = intent?.getParcelableExtra<UserResponse>(USER_RESPONSE) as UserResponse
+        supportActionBar?.title = userResponseFriend.fullName
+
+        adapter.setUserResponseUser(userResponseUser)
+        adapter.setUserResponseFriend(userResponseFriend)
     }
 
     private fun initialize() {
         recyclerView = findViewById(R.id.chatroomActivity_recycleview)
         input_message = findViewById(R.id.chatroomActivity_inputmessage)
         btn_send = findViewById(R.id.chatroomActivity_btn_send)
+
+        recyclerView.layoutManager = LinearLayoutManager(this@RoomChatActivity)
+        recyclerView.setHasFixedSize(true)
 
         viewModel = ViewModelProvider(this, ViewModelProvider.NewInstanceFactory())[RoomChatViewModel::class.java]
     }
