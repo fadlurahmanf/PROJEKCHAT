@@ -19,7 +19,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 
-//PENAMBAHAN PADA HOME ACTIVITY
+//PENAMBAHAN PADA HOME ACTIVITY PADA SISI REMOTE GITHUB
 
 class HomeActivity : AppCompatActivity() {
 
