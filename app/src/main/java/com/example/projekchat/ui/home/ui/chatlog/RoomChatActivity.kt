@@ -34,6 +34,8 @@ import org.json.JSONObject
 
 //PENAMBAHAN PADA ROOM CHAT ACTIVITY
 
+//PENAMBAHAN KEDUA PADA ROOM CHAT ACTIVITY
+
 class RoomChatActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
