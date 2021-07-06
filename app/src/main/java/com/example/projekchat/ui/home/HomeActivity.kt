@@ -20,6 +20,7 @@ import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 
 //PENAMBAHAN PADA HOME ACTIVITY DARI SISI GITHUB
+//PENAMBAHAN PADA HOME ACTIVITY PADA SISI REMOTE GITHUB
 
 class HomeActivity : AppCompatActivity() {
 

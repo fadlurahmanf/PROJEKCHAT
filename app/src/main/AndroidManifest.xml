@@ -17,6 +17,14 @@
         <activity
             android:name=".ui.home.ui.chatlog.RoomChatActivity"
             android:parentActivityName=".ui.home.HomeActivity" />
+<!--        <activity android:name=".ui.home.ui.chatlog.RoomChatActivity">-->
+<!--            <meta-data android:name="android.support.PARENT_ACTIVITY" android:value=".ui.home.HomeActivity"></meta-data>-->
+<!--        </activity>-->
+        <!--        <activity android:name=".ui.home.ui.chatlog.RoomChatActivity">-->
+<!--            <meta-data android:name="android.support.PARENT_ACTIVITY" android:value=".ui.home.HomeActivity"></meta-data>-->
+<!--        </activity>-->
+        <activity android:name=".ui.home.ui.chatlog.RoomChatActivity"
+            android:parentActivityName=".ui.home.HomeActivity"></activity>
         <activity android:name=".ui.home.ui.invitation.InvitationActivity" />
         <activity android:name=".ui.home.HomeActivity" />
         <activity android:name=".ui.home.ui.searchfriend.SearchFriendActivity" />
