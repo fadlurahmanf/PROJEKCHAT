@@ -32,6 +32,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
+//PENAMBAHAN PADA ROOM CHAT ACTIVITY
+
 class RoomChatActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
