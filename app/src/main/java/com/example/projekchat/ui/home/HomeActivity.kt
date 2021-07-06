@@ -80,7 +80,8 @@ class HomeActivity : AppCompatActivity() {
         }
 
     }
-
+    
+    //INI HAL YANG GUA UBAH
 
     private fun initializationLayout() {
         btn_searchFriend = findViewById(R.id.mainActivity_btn_searchFriend)
