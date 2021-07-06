@@ -217,6 +217,8 @@ class RoomChatActivity : AppCompatActivity() {
                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
         )
+        
+        //TAMBAHAN PADA ROOM CHAT ACTIVITY
 
         requestQueue.add(request)
     }
