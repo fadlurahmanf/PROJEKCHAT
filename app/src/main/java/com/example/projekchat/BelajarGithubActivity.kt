@@ -9,7 +9,7 @@ import android.os.Bundle
 //TAMBAHAN 1 DARI ANDROID STUDIO
 //PENAMBAHAN STANDARD GUA TAMBAHIN NIH DARI GITHUB
 
-//TAMBAHAN 1 DARI GITHUB
+//TAMBAHAN 1 DARI GITHUB//
 
 class BelajarGithubActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
