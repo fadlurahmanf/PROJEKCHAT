@@ -4,7 +4,9 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 
 
-//PENAMBAHAN STANDARD
+//PENAMBAHAN STANDARD gua tambahin dari android studio
+
+//TAMBAHAN 1 DARI ANDROID STUDIO
 
 class BelajarGithubActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
