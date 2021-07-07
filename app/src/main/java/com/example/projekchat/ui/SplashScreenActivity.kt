@@ -10,6 +10,8 @@ import com.example.projekchat.services.auth.AuthenticationService
 import com.example.projekchat.ui.home.HomeActivity
 import com.example.projekchat.ui.login.LoginActivity
 
+
+//INI SALAH SEHARUSNYA GUA ILANGIN
 class SplashScreenActivity : AppCompatActivity() {
     private lateinit var imageSplashScreen:ImageView
     override fun onCreate(savedInstanceState: Bundle?) {
